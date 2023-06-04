@@ -40,3 +40,7 @@ Execute `npm start` to run frontend.
 # Frontend Development Guideline
 
 All function connecting with Smart contract are located in `index.js` with `TODO:` prefix. 
+
+# Customer Note:
+- Install `yarn install`
+- Run `yarn start`
