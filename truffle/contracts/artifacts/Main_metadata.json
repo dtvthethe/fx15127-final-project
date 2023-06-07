@@ -1,0 +1,323 @@
+{
+	"compiler": {
+		"version": "0.8.20+commit.a1b79de6"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint8",
+						"name": "_numberOfUser",
+						"type": "uint8"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "_account",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "msg",
+						"type": "string"
+					}
+				],
+				"name": "AddParticipant",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "_account",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "_fullName",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "_email",
+						"type": "string"
+					}
+				],
+				"name": "UpdateParticipant",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_account",
+						"type": "address"
+					}
+				],
+				"name": "addParticipant",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "session",
+						"type": "address"
+					}
+				],
+				"name": "addSession",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "admin",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getAllParticipants",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "account",
+								"type": "address"
+							},
+							{
+								"internalType": "string",
+								"name": "fullName",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "email",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "numberOfSession",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint8",
+								"name": "deviation",
+								"type": "uint8"
+							}
+						],
+						"internalType": "struct IParticipant[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_account",
+						"type": "address"
+					}
+				],
+				"name": "getParticipant",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "account",
+								"type": "address"
+							},
+							{
+								"internalType": "string",
+								"name": "fullName",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "email",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "numberOfSession",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint8",
+								"name": "deviation",
+								"type": "uint8"
+							}
+						],
+						"internalType": "struct IParticipant",
+						"name": "",
+						"type": "tuple"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "participants",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "fullName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "email",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "numberOfSession",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint8",
+						"name": "deviation",
+						"type": "uint8"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "sessions",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_account",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "_fullName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "_email",
+						"type": "string"
+					}
+				],
+				"name": "updateParticipant",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"Main.sol": "Main"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": true,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"Main.sol": {
+			"keccak256": "0x4b2eb2ea5896fed10016b3f3b111efe62023e2810384e5097ad9f35aa61bcf48",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a263391445851048b0d3e0e04ae953805009a2005b69a02ad4ec143202a6d46a",
+				"dweb:/ipfs/QmemQmf7m7aE8UoM8M5d9CKfSAbyo1BtSvJkBiDJZzSxB4"
+			]
+		},
+		"Session.sol": {
+			"keccak256": "0x50c9d6a869b0c049d9d498d94c145cf22aba62b2d5ab3c4f8a16427f8a8f5c48",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://edb77b724c2ea4e7387c70eee59454089a58fe36fb6283bef6ecf7eacdfd82fa",
+				"dweb:/ipfs/QmP9rkV5KJ64tjSBgUNeNxNQwRQXeG5kPCGPRM9GovhEuB"
+			]
+		},
+		"modal/IParticipant.sol": {
+			"keccak256": "0x3e7562fb2942c94dd24d5611bf2374c4573d95c6e84a139e7c0487cd052bd210",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4a5db521a2ee1614cd5aab7e4ff800f998f4669062fb4a14b12c20cb13fbe897",
+				"dweb:/ipfs/QmWuSNJdK6XDvrihpLCXggeMV8muv6PwAtBJu1GvgatRPh"
+			]
+		}
+	},
+	"version": 1
+}
