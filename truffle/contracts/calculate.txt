@@ -1,0 +1,71 @@
+// Calculate suggest price.
+    // function calculateSuggestPrice() public onlyAdmin {
+    //     mapping(address => uint256) prices = session.participantPrices;
+    //     uint256 _suggestPrice = 0;
+    //     uint256 sumOfPriceWithDeviation = 0;
+    //     uint256 sumOfDeviation = 0;
+
+    //     for (uint256 i = 0; i < participantPricings.length; i++) {
+    //         sumOfPriceWithDeviation += prices[participantPricings[i]] * (100 - saiSoNguoiDinhGiaI);
+    //         sumOfDeviation += saiSoNguoiDinhGiaI;
+    //     }
+
+    //     _suggestPrice = sumOfPriceWithDeviation / ((100 * participantPricings.length) - sumOfDeviation);
+    //     session.suggestPrice = _suggestPrice;
+    // }
+
+    // // Calculate deviation in session.
+    // function calculateDeviationInSession(address _account) public onlyAdmin onlyFinalPriceMustSetValue returns (uint256) {
+    //     uint256 _deviation = 0;
+    //     uint256 _subDeviation = (session.finalPrice - session.participantPrices[_account]).abs();
+    //     _deviation = (_subDeviation / session.finalPrice) * 100;
+
+    //     return _deviation;
+    // }
+
+    // // Calculate deviation.
+    // function calculateDeviation(address _account) public onlyAdmin onlyFinalPriceMustSetValue returns (uint256) {
+    //     uint256 _deviation = 0;
+    //     // TODO: confirm lai cong thuc tinh deviation.
+    //     uint256 _subDeviation = (MainContract.getParticipant(_account).deviation * n) + calculateDeviationInSession(_account);
+    //     _deviation = _subDeviation / (n + 1);
+    //     return _deviation;
+    // }
+
+
+
+
+
+// Calculate suggest price.
+    function calculateSuggestPrice() public onlyAdmin {
+        mapping(address => uint256) prices = session.participantPrices;
+        uint256 _suggestPrice = 0;
+        uint256 sumOfPriceWithDeviation = 0;
+        uint256 sumOfDeviation = 0;
+
+        for (uint256 i = 0; i < participantPricings.length; i++) {
+            sumOfPriceWithDeviation += prices[participantPricings[i]] * (100 - saiSoNguoiDinhGiaI);
+            sumOfDeviation += saiSoNguoiDinhGiaI;
+        }
+
+        _suggestPrice = sumOfPriceWithDeviation / ((100 * participantPricings.length) - sumOfDeviation);
+        session.suggestPrice = _suggestPrice;
+    }
+
+    // Calculate deviation in session.
+    function calculateDeviationInSession(address _account) public onlyAdmin onlyFinalPriceMustSetValue returns (uint256) {
+        uint256 _deviation = 0;
+        uint256 _subDeviation = (session.finalPrice - session.participantPrices[_account]).abs();
+        _deviation = (_subDeviation / session.finalPrice) * 100;
+
+        return _deviation;
+    }
+
+    // Calculate deviation.
+    function calculateDeviation(address _account) public onlyAdmin onlyFinalPriceMustSetValue returns (uint256) {
+        uint256 _deviation = 0;
+        // TODO: confirm lai cong thuc tinh deviation.
+        uint256 _subDeviation = (MainContract.getParticipant(_account).deviation * n) + calculateDeviationInSession(_account);
+        _deviation = _subDeviation / (n + 1);
+        return _deviation;
+    }
