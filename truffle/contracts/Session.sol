@@ -4,7 +4,8 @@ pragma solidity ^0.8.20;
 
 // Interface of Main contract to call from Session contract
 interface IMain {
-    function addSession(address session) internal;
+    function addSession(address session) external;
+    function getAdmin() external view returns (address);
 }
 
 contract Session {
@@ -14,7 +15,7 @@ contract Session {
     IMain MainContract;
 
     // TODO: Variables
-    enum SESSION_STATUS {CREATED, INPROGRESS, CLOSE};
+    enum SESSION_STATUS {CREATED, INPROGRESS, CLOSE}
 
     string private productName;
     string private description;
@@ -38,7 +39,6 @@ contract Session {
         MainContract = IMain(_mainContract);
 
         // TODO: Init Session contract
-        // session = ISession(_productName, _description, _images, [], 0, 0, SESSION_STATUS.CREATED);
         productName = _productName;
         description = _description;
         images = _images;
@@ -51,7 +51,7 @@ contract Session {
     }
 
     //Update session.
-    function updateSession(string _productName, string _description, string[] images) public onlyAdmin {
+    function updateSession(string memory _productName, string memory _description, string[] memory _images) public onlyAdmin {
         // TODO
         productName = _productName;
         description = _description;
@@ -79,6 +79,15 @@ contract Session {
         }
     }
 
+    // Get session detail.
+    function getSessionDetail() public view returns(string memory, string memory, string[] memory, uint256, uint256, uint8) {
+
+        return (productName, description, images, suggestPrice, finalPrice, uint8(status));
+ 
+        // mapping(address => uint256) private mapParticipantPricings;
+        // address[] private participantPricings;
+    }
+
     // Caluculate functions.
 
     // Modify only status is INPROGRESS.
@@ -89,14 +98,14 @@ contract Session {
 
     // Modify to check only admin.
     modifier onlyAdmin() {
-        require(msg.sender == MainContract.admin, "This function only admin can execute!");
+        require(msg.sender == MainContract.getAdmin(), "This function only admin can execute!");
         _;
     }
 
     // Modify to check only participant.
     modifier onlyParticipant() {
         // TODO: viet lai modifier nay
-        require(msg.sender != MainContract.admin, "This function only participant can execute!");
+        require(msg.sender != MainContract.getAdmin(), "This function only participant can execute!");
         _;
     }
 

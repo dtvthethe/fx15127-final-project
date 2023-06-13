@@ -1,3 +1,9 @@
+["a.png", "b.png"]
+["c.png", "d.png"]
+
+0x2a98805abf699f0249bba03671b32ec971a899424085b4ad3f94acd1120f511d
+0xb29d6a518f9f11a00e5cb73dffd8620bf5418d16d43422827248a1fb7a74a1fe
+
 // Calculate suggest price.
     // function calculateSuggestPrice() public onlyAdmin {
     //     mapping(address => uint256) prices = session.participantPrices;
