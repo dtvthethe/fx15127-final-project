@@ -6,6 +6,7 @@ pragma solidity ^0.8.20;
 interface IMain {
     function addSession(address session) external;
     function getAdmin() external view returns (address);
+    function getDeviation(address _account) external view returns (uint8);
 }
 
 contract Session {
@@ -52,7 +53,6 @@ contract Session {
 
     //Update session.
     function updateSession(string memory _productName, string memory _description, string[] memory _images) public onlyAdmin {
-        // TODO
         productName = _productName;
         description = _description;
         images = _images;
@@ -81,14 +81,43 @@ contract Session {
 
     // Get session detail.
     function getSessionDetail() public view returns(string memory, string memory, string[] memory, uint256, uint256, uint8) {
-
         return (productName, description, images, suggestPrice, finalPrice, uint8(status));
- 
-        // mapping(address => uint256) private mapParticipantPricings;
-        // address[] private participantPricings;
     }
 
-    // Caluculate functions.
+    // Calculate suggest price.
+    function calculateSuggestPrice() public onlyAdmin {
+        uint256 _suggestPrice = 0;
+        uint256 _sumOfPriceWithDeviation = 0;
+        uint256 _sumOfDeviation = 0;
+
+
+        for (uint256 i = 0; i < participantPricings.length; i++) {
+            uint8 _deviation = MainContract.getDeviation(participantPricings[i]);
+            _sumOfPriceWithDeviation += mapParticipantPricings[participantPricings[i]] * (100 - _deviation);
+            _sumOfDeviation += _deviation;
+        }
+
+        _suggestPrice = _sumOfPriceWithDeviation / ((100 * participantPricings.length) - _sumOfDeviation);
+        suggestPrice = _suggestPrice;
+    }
+
+    // // Calculate deviation in session.
+    // function calculateDeviationInSession(address _account) public onlyAdmin onlyFinalPriceMustSetValue returns (uint256) {
+    //     uint256 _deviation = 0;
+    //     uint256 _subDeviation = (session.finalPrice - session.participantPrices[_account]).abs();
+    //     _deviation = (_subDeviation / session.finalPrice) * 100;
+
+    //     return _deviation;
+    // }
+
+    // // Calculate deviation.
+    // function calculateDeviation(address _account) public onlyAdmin onlyFinalPriceMustSetValue returns (uint256) {
+    //     uint256 _deviation = 0;
+    //     // TODO: confirm lai cong thuc tinh deviation.
+    //     uint256 _subDeviation = (MainContract.getParticipant(_account).deviation * n) + calculateDeviationInSession(_account);
+    //     _deviation = _subDeviation / (n + 1);
+    //     return _deviation;
+    // }
 
     // Modify only status is INPROGRESS.
     modifier onlyInProgress {

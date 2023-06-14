@@ -76,6 +76,11 @@ contract Main is IMain {
         emit CreateSession(_productName, _description);
     }
 
+    // Get deviation by participant.
+    function getDeviation(address _account) external view returns (uint8) {
+        return mapParticipants[_account].deviation;
+    }
+
     // Get all Session address.
     function getAllSessionAddresses() public view returns (address[] memory) {
         return sessions;
@@ -84,6 +89,7 @@ contract Main is IMain {
     function getAllSessions() public view returns (address[] memory) {
         return sessions;
     }
+
 
     // Get session detail.
     function getSessionDetail(address _session) public view returns (string memory, string memory, string[] memory, uint256, uint256, uint8) {
