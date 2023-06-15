@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-// import "./lib/UtilityLibrary.sol";
+import "./lib/UtilityLibrary.sol";
 
 // Interface of Main contract to call from Session contract
 interface IMain {
     function addSession(address session) external;
     function getAdmin() external view returns (address);
-    function getDeviation(address _account) external view returns (uint8);
+    function getDeviation(address _account) external view returns (int);
+    function setDeviation(address _account, int _deviation) external;
+    function incrementNumberOfSession(address _account) external;
+    function getNumberOfSession(address _account) external view returns(int);
 }
 
 contract Session {
@@ -21,13 +24,13 @@ contract Session {
     string private productName;
     string private description;
     string[] private images;
-    uint256 private suggestPrice;
-    uint256 private finalPrice;
+    uint private suggestPrice;
+    int private finalPrice;
     SESSION_STATUS private status;
-    mapping(address => uint256) private mapParticipantPricings;
+    mapping(address => int) private mapParticipantPricings;
     address[] private participantPricings;
 
-    // using UtilityLibrary for uint256;
+    using UtilityLibrary for int;
 
     constructor(
         address _mainContract,
@@ -49,6 +52,7 @@ contract Session {
 
         // Call Main Contract function to link current contract.
         MainContract.addSession(address(this));
+        emit CreateSession(_productName, _description, "Create session success!");
     }
 
     //Update session.
@@ -56,68 +60,72 @@ contract Session {
         productName = _productName;
         description = _description;
         images = _images;
+        emit UpdateSession(_productName, _description, "Update session success!");
     }
 
     // TODO: Functions
     // Set status to INPROGRESS.
     function startSession() public onlyAdmin {
         status = SESSION_STATUS.INPROGRESS;
+
+        emit StartSession("Start session success!");
     }
 
     // Set status to CLOSE.
     function closeSession() public onlyAdmin {
         status = SESSION_STATUS.CLOSE;
+        emit CloseSession("Close session success!");
     }
 
     // Participant pricing.
-    function pricing(address _account, uint256 _price) public onlyParticipant onlyInProgress {
+    function pricing(address _account, int _price) public onlyParticipant onlyInProgress {
         mapParticipantPricings[_account] = _price;
 
         if (mapParticipantPricings[_account] == 0) {
             // check this work?
             participantPricings.push(_account);
+            MainContract.incrementNumberOfSession(_account);
         }
+
+        emit Pricing(_account, "Pricing success!");
     }
 
     // Get session detail.
-    function getSessionDetail() public view returns(string memory, string memory, string[] memory, uint256, uint256, uint8) {
-        return (productName, description, images, suggestPrice, finalPrice, uint8(status));
+    function getSessionDetail() public view returns(string memory, string memory, string[] memory, uint, int, uint) {
+        return (productName, description, images, suggestPrice, finalPrice, uint(status));
     }
 
     // Calculate suggest price.
     function calculateSuggestPrice() public onlyAdmin {
-        uint256 _suggestPrice = 0;
-        uint256 _sumOfPriceWithDeviation = 0;
-        uint256 _sumOfDeviation = 0;
+        int _suggestPrice = 0;
+        int _sumOfPriceWithDeviation = 0;
+        int _sumOfDeviation = 0;
 
-
-        for (uint256 i = 0; i < participantPricings.length; i++) {
-            uint8 _deviation = MainContract.getDeviation(participantPricings[i]);
+        for (uint i = 0; i < participantPricings.length; i++) {
+            // TODO: ko co thi return 0
+            int _deviation = MainContract.getDeviation(participantPricings[i]);
             _sumOfPriceWithDeviation += mapParticipantPricings[participantPricings[i]] * (100 - _deviation);
             _sumOfDeviation += _deviation;
         }
 
-        _suggestPrice = _sumOfPriceWithDeviation / ((100 * participantPricings.length) - _sumOfDeviation);
-        suggestPrice = _suggestPrice;
+        _suggestPrice = _sumOfPriceWithDeviation / ((100 * int(participantPricings.length)) - _sumOfDeviation);
+        suggestPrice = uint(_suggestPrice);
     }
 
-    // // Calculate deviation in session.
-    // function calculateDeviationInSession(address _account) public onlyAdmin onlyFinalPriceMustSetValue returns (uint256) {
-    //     uint256 _deviation = 0;
-    //     uint256 _subDeviation = (session.finalPrice - session.participantPrices[_account]).abs();
-    //     _deviation = (_subDeviation / session.finalPrice) * 100;
+    // Calculate deviation in session.
+    function calculateDeviationInSession(address _account) public view onlyAdmin onlyFinalPriceMustSetValue returns (int) {
+        int _subDeviation = (finalPrice - mapParticipantPricings[_account]).abs();
 
-    //     return _deviation;
-    // }
+        return (_subDeviation / finalPrice) * 100;
+    }
 
-    // // Calculate deviation.
-    // function calculateDeviation(address _account) public onlyAdmin onlyFinalPriceMustSetValue returns (uint256) {
-    //     uint256 _deviation = 0;
-    //     // TODO: confirm lai cong thuc tinh deviation.
-    //     uint256 _subDeviation = (MainContract.getParticipant(_account).deviation * n) + calculateDeviationInSession(_account);
-    //     _deviation = _subDeviation / (n + 1);
-    //     return _deviation;
-    // }
+    // Calculate deviation.
+    function calculateDeviationLatest(address _account) public onlyAdmin onlyFinalPriceMustSetValue {
+        int _deviation = MainContract.getDeviation(_account);
+        int _subDeviation = (_deviation * MainContract.getNumberOfSession(_account)) + calculateDeviationInSession(_account);
+        int _newDeviation = _subDeviation / (_deviation + 1);
+        MainContract.setDeviation(_account, _newDeviation);
+    }
 
     // Modify only status is INPROGRESS.
     modifier onlyInProgress {
@@ -143,4 +151,19 @@ contract Session {
         require(finalPrice > 0, "Final price must set value!");
         _;
     }
+
+    // Event create session.
+    event CreateSession(string _productName, string _description, string _msg);
+
+    // Event update session.
+    event UpdateSession(string _productName, string _description, string _msg);
+
+    // Event start session.
+    event StartSession(string _msg);
+
+    // Event close session.
+    event CloseSession(string _msg);
+
+    // Event pricing.
+    event Pricing(address _account, string _msg);
 }
