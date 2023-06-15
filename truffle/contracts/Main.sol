@@ -3,26 +3,25 @@ pragma solidity ^0.8.20;
 import "./Session.sol";
 
 contract Main is IMain {
-
     // Structure to hold details of Bidder
     struct IParticipant {
         // TODO
         address account;
         string fullName;
         string email;
-        uint256 numberOfSession;
-        uint8 deviation;
+        int numberOfSession;
+        int deviation;
     }
 
     address public admin;
 
     // TODO: Variables
-    uint8 private maxOfUser;
+    uint private maxOfUser;
     mapping(address => IParticipant) private mapParticipants;
     address[] private participants;
     address[] private sessions;
 
-    constructor(uint8 _maxOfUser) {
+    constructor(uint _maxOfUser) {
         admin = msg.sender;
         maxOfUser = _maxOfUser;
     }
@@ -63,7 +62,7 @@ contract Main is IMain {
     function getAllParticipants() public onlyAdmin view returns (IParticipant[] memory) {
         IParticipant[] memory _participants = new IParticipant[](participants.length);
 
-        for (uint8 i = 0; i < participants.length; i++) {
+        for (uint i = 0; i < participants.length; i++) {
             _participants[i] = mapParticipants[participants[i]];
         }
 
@@ -77,8 +76,23 @@ contract Main is IMain {
     }
 
     // Get deviation by participant.
-    function getDeviation(address _account) external view returns (uint8) {
+    function getDeviation(address _account) external view returns (int) {
         return mapParticipants[_account].deviation;
+    }
+
+    // Set deviation.
+    function setDeviation(address _account, int _deviation) public onlyAdmin {
+        mapParticipants[_account].deviation = _deviation;
+    }
+
+    // Set numnber of session.
+    function incrementNumberOfSession(address _account) public onlyAdmin {
+        mapParticipants[_account].numberOfSession++;
+    }
+
+    // Get number of session.
+    function getNumberOfSession(address _account) public view onlyAdmin returns(int) {
+        return mapParticipants[_account].numberOfSession;
     }
 
     // Get all Session address.
@@ -92,7 +106,7 @@ contract Main is IMain {
 
 
     // Get session detail.
-    function getSessionDetail(address _session) public view returns (string memory, string memory, string[] memory, uint256, uint256, uint8) {
+    function getSessionDetail(address _session) public view returns (string memory, string memory, string[] memory, uint, int, uint) {
         Session session = Session(_session);
 
         return session.getSessionDetail();

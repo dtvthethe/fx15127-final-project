@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 library UtilityLibrary {
-    function abs(uint256 _input) internal pure returns (uint256) {
+    function abs(int _input) internal pure returns (int) {
         if (_input < 0) {
             return _input * -1;
         }
