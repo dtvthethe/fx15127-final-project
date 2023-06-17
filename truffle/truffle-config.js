@@ -25,8 +25,7 @@
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 module.exports = {
-
-
+  contracts_build_directory: "../contracts/",
   networks: {
 
     development: {
@@ -41,11 +40,11 @@ module.exports = {
     // timeout: 100000
   },
 
-  contracts_directory: "../contracts/",
+  // contracts_directory: "../contracts/",
   // Configure your compilers
   compilers: {
     solc: {
-      version: "^0.4.17",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "^0.8.20",    // Fetch exact version from solc-bin (default: truffle's version)
     }
   }
 }

@@ -14,7 +14,7 @@ Truffle environment is located in `truffle` directory, with predefined configure
     - Port: 7545
     - Network Id: 5777
   - Compiled Contracts Directory: `../contracts/` which is shared between `frontend` (Dapps) and `truffle`
-  - Complilers version: `^0.4.17`
+  - Complilers version: `^0.8.20`
 
 You can change those configurations, and included it to your submission.
 
