@@ -14,7 +14,7 @@ Truffle environment is located in `truffle` directory, with predefined configure
     - Port: 7545
     - Network Id: 5777
   - Compiled Contracts Directory: `../contracts/` which is shared between `frontend` (Dapps) and `truffle`
-  - Complilers version: `^0.4.17`
+  - Complilers version: `^0.4.26`
 
 You can change those configurations, and included it to your submission.
 
@@ -42,5 +42,8 @@ Execute `npm start` to run frontend.
 All function connecting with Smart contract are located in `index.js` with `TODO:` prefix. 
 
 # Customer Note:
+- cd to `truffle` folder `truffle migrate`, copy smart contract address deploy.
+- Update smart contract address to `mainContract` in `config.js` file.
 - Install `yarn install`
 - Run `yarn start`
+- App url = `http://localhost:1234`

@@ -45,3 +45,7 @@ testem.log
 .DS_Store
 Thumbs.db
 .cache
+
+# custom
+truffle/contracts/artifacts/
+truffle/contracts/lib/artifacts/

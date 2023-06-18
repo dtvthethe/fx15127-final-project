@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.4.26;
+pragma experimental ABIEncoderV2;
 import "./lib/UtilityLibrary.sol";
 
 // Interface of Main contract to call from Session contract
@@ -37,7 +38,7 @@ contract Session {
         string memory _productName,
         string memory _description,
         string[] memory _images
-    ) {
+    ) public {
         // Get Main Contract instance
         mainContract = _mainContract;
         MainContract = IMain(_mainContract);

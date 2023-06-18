@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.4.26;
+pragma experimental ABIEncoderV2;
 import "./Session.sol";
 
 contract Main is IMain {
@@ -13,17 +14,26 @@ contract Main is IMain {
         int deviation;
     }
 
+    // Struct IUser:
+    struct IUser {
+        address account;
+        string fullName;
+        string email;
+    }
+
     address public admin;
 
     // TODO: Variables
     uint private maxOfUser;
     mapping(address => IParticipant) private mapParticipants;
-    address[] private participants;
+    address[] private participantItems;
     address[] private sessions;
+    IUser private adminProfile;
 
-    constructor(uint _maxOfUser) {
+    constructor(uint _maxOfUser) public {
         admin = msg.sender;
         maxOfUser = _maxOfUser;
+        adminProfile.account = msg.sender;
     }
 
     // Add a Session Contract address into Main Contract. Use to link Session with Main
@@ -39,34 +49,55 @@ contract Main is IMain {
         return admin;
     }
 
+    // Update admin profile.
+    function updateAdminProfile(string _fullName, string _email) public onlyAdmin {
+        adminProfile.fullName = _fullName;
+        adminProfile.email = _email;
+    }
+
+    // Get admin profile.
+    function getAdminProfile() public onlyAdmin view returns(IUser memory) {
+        return adminProfile;
+    }
+
     // Add participant.
     function addParticipant(address _account) public onlyAdmin onlyInNumberOfRangeParticipant {
         mapParticipants[_account] = IParticipant(_account, "", "", 0, 0);
-        participants.push(_account);
+        participantItems.push(_account);
         emit AddParticipant(_account, "Add participant success!");
     }
 
     // Update participant.
-    function updateParticipant(address _account, string memory _fullName, string memory _email) public {
+    function register(address _account, string memory _fullName, string memory _email) public {
         mapParticipants[_account].fullName = _fullName;
         mapParticipants[_account].email = _email;
         emit UpdateParticipant(_account, _fullName, _email);
     }
 
     // Get participant by address.
-    function getParticipant(address _account) public view returns (IParticipant memory) {
+    function participants(address _account) public view returns (IParticipant memory) {
         return mapParticipants[_account];
     }
 
     // Get all participants.
     function getAllParticipants() public onlyAdmin view returns (IParticipant[] memory) {
-        IParticipant[] memory _participants = new IParticipant[](participants.length);
+        IParticipant[] memory _participants = new IParticipant[](participantItems.length);
 
-        for (uint i = 0; i < participants.length; i++) {
-            _participants[i] = mapParticipants[participants[i]];
+        for (uint i = 0; i < participantItems.length; i++) {
+            _participants[i] = mapParticipants[participantItems[i]];
         }
 
         return _participants;
+    }
+
+    // Get number of participants.
+    function nParticipants() public view returns (uint) {
+        return participantItems.length;
+    }
+
+    // Get participant by index.
+    function iParticipants(uint _index) public view returns (IParticipant memory) {
+        return mapParticipants[participantItems[_index]];
     }
 
     // Create new Session.
@@ -95,7 +126,7 @@ contract Main is IMain {
         return mapParticipants[_account].numberOfSession;
     }
 
-    // Get all Session address.
+    // Get all session address.
     function getAllSessionAddresses() public view returns (address[] memory) {
         return sessions;
     }
@@ -104,6 +135,10 @@ contract Main is IMain {
         return sessions;
     }
 
+    // Get number of session.
+    function nSessions() public view returns (uint) {
+        return sessions.length;
+    }
 
     // Get session detail.
     function getSessionDetail(address _session) public view returns (string memory, string memory, string[] memory, uint, int, uint) {
@@ -120,7 +155,7 @@ contract Main is IMain {
 
     // Modify number of participant in ragne.
     modifier onlyInNumberOfRangeParticipant() {
-        require(participants.length < maxOfUser, "Only create 10 users!");
+        require(participantItems.length < maxOfUser, "Only create 10 users!");
         _;
     }
 
