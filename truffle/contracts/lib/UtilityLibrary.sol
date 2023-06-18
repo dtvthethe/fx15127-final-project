@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.4.26;
 
 library UtilityLibrary {
     function abs(int _input) internal pure returns (int) {
