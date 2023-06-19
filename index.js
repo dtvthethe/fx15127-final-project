@@ -101,6 +101,9 @@ function componentMain() {
 
     // Get all participants
     getAllParticipants: () => mainContract.methods.getAllParticipants().call,
+
+    // Add participant
+    addParticipant: (address) => mainContract.methods.addParticipant(address).send,
   };
 
   const actions = {
@@ -223,13 +226,18 @@ function componentMain() {
       let participants = [];
 
       // TODO: Load all participants from Main contract.
-      // One participant should contain { address, fullname, email, nSession (numberOfSession) and deviation }
+      // One participant should contain { address, fullname, email, nSession and deviation }
 
-     
-
-      // console.log(state.account);
-      // const result = await contractFunctions.getAllParticipants()({ from: state.account });
-      // console.log(result);
+      const results = await contractFunctions.getAllParticipants()({ from: state.account });
+      participants = results.map(item => {
+        return {
+          address: item.account,
+          deviation: item.deviation,
+          email: item.email,
+          fullName: item.fullName,
+          nSession: item.numberOfSession,
+        }
+      });
 
       actions.setParticipants(participants);
     },
@@ -343,7 +351,20 @@ function componentMain() {
     },
 
     createNewParticipant: () => async (state, actions) => {
-      console.log(state.newParticipant);
+      try {
+        console.log(state.newParticipant);
+        const result = await contractFunctions.addParticipant(state.newParticipant.address)({ from: state.account });
+        console.log(result);
+      } catch (error) {
+        console.log(error);
+      }
+      
+      // return {
+      //   ...state,
+      //   newParticipant: {
+      //     email: '',
+      //   }
+      // };
     }
   };
 
