@@ -60,7 +60,8 @@ function componentMain() {
     email: ''.replace,
     newProduct: {},
     sessions: [],
-    currentProductIndex: 0
+    currentProductIndex: 0,
+    newParticipant: {}
   };
 
   // Functions of Main Contract
@@ -329,12 +330,26 @@ function componentMain() {
           walletInstalled: false
         };
       }
+    },
+
+    inputNewParticipant: ({fieldName, value}) => state => {
+      let newParticipant = state.newParticipant;
+      newParticipant[fieldName] = value;
+
+      return {
+        ...state,
+        newParticipant
+      };
+    },
+
+    createNewParticipant: () => async (state, actions) => {
+      console.log(state.newParticipant);
     }
   };
 
   const view = (
     state,
-    { getAccount, getParticipants, register, inputProfile, getSessions, checkWalletInstalled }
+    { getAccount, getParticipants, register, inputProfile, getSessions }
   ) => {
     // return (<body>Test</body>);
     // console.log(
