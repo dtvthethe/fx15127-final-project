@@ -1,34 +1,11 @@
 - validate form
 - register nhap thong tin name, email cung chan show Toat de biet la update thonf tin thanh cong
+- them popup confirm khi: start, close
+- numberOfSession: đọc lại spec, số lượng này chỉ đc tăng khi ng admin chốt giá p ko?
 
 https://upload.wikimedia.org/wikipedia/en/b/bd/Doraemon_character.png
 
 
-
- case 'start': 
-    //TODO: Handle event when User Start a new session
-    break;
-case 'stop':
-    //TODO: Handle event when User Stop a session
-
-    break;
-case 'pricing':
-    //TODO: Handle event when User Pricing a product
-    //The inputed Price is stored in `data`
-
-    break;
-case 'close':
-    //TODO: Handle event when User Close a session
-    //The inputed Price is stored in `data`
-
-=========handle UI /products=========
-- undefined -> 0 // CREATED x
-    + user view info
-- start -> 1 // START -
-    + 
-- stop -> 2 // STOP -
-- pricing -> 3 // PRICING x
-- close -> 4 // CLOSE x
 
 
 

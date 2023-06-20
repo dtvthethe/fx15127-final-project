@@ -31,6 +31,7 @@ contract Session {
     mapping(address => int) private mapParticipantPricings;
     mapping(address => bool) private isParticipantPricingExists;
     address[] private participantPricings;
+    address private adminAddr;
 
     using UtilityLibrary for int;
 
@@ -51,6 +52,7 @@ contract Session {
         suggestPrice = 0;
         finalPrice = 0;
         status = SESSION_STATUS.CREATED;
+        adminAddr = MainContract.getAdmin();
 
         // Call Main Contract function to link current contract.
         MainContract.addSession(address(this));
@@ -119,14 +121,13 @@ contract Session {
         return (productName, description, images, suggestPrice, finalPrice, uint(status));
     }
 
-    // Calculate suggest price. (Set price and Close)
-    function calculateSuggestPrice() public onlyAdmin onlyInProgress {
+    // Calculate suggest price and set status to Close.
+    function calculateSuggestPriceAndCloseSession(int _price) public onlyAdmin onlyInProgress {
         int _suggestPrice = 0;
         int _sumOfPriceWithDeviation = 0;
         int _sumOfDeviation = 0;
 
         for (uint i = 0; i < participantPricings.length; i++) {
-            // TODO: ko co thi return 0
             int _deviation = MainContract.getDeviation(participantPricings[i]);
             _sumOfPriceWithDeviation += mapParticipantPricings[participantPricings[i]] * (100 - _deviation);
             _sumOfDeviation += _deviation;
@@ -134,22 +135,31 @@ contract Session {
 
         _suggestPrice = _sumOfPriceWithDeviation / ((100 * int(participantPricings.length)) - _sumOfDeviation);
         suggestPrice = uint(_suggestPrice);
+        finalPrice = _price;
         status = SESSION_STATUS.CLOSE;
     }
 
     // Calculate deviation in session.
-    function calculateDeviationInSession(address _account) public view onlyAdmin onlyFinalPriceMustSetValue returns (int) {
+    function calculateDeviationInSession(address _account) private view returns (int) {
         int _subDeviation = (finalPrice - mapParticipantPricings[_account]).abs();
+        int _subDeviationResult = ((_subDeviation * 10**18) / finalPrice) * 100;
 
-        return (_subDeviation / finalPrice) * 100;
+        // return _subDeviationResult / 10**16;
+        return _subDeviationResult / 10**18;
     }
 
     // Calculate deviation.
-    function calculateDeviationLatest(address _account) public onlyAdmin onlyFinalPriceMustSetValue {
-        int _deviation = MainContract.getDeviation(_account);
-        int _subDeviation = (_deviation * MainContract.getNumberOfSession(_account)) + calculateDeviationInSession(_account);
-        int _newDeviation = _subDeviation / (_deviation + 1);
-        MainContract.setDeviation(_account, _newDeviation);
+    function calculateDeviationLatestAndStop() public onlyAdmin onlyFinalPriceMustSetValue {
+        for (uint i = 0; i < participantPricings.length; i++) {
+            address _account = participantPricings[i];
+            int _deviation = MainContract.getDeviation(_account);
+            int _subDeviation = (_deviation * MainContract.getNumberOfSession(_account)) + calculateDeviationInSession(_account);
+            int _newDeviation = _subDeviation / (_deviation + 1);
+
+            MainContract.setDeviation(_account, _newDeviation);
+        }
+
+        status = SESSION_STATUS.STOP;
     }
 
     // Modify only status is PRICING.
@@ -166,14 +176,14 @@ contract Session {
 
     // Modify to check only admin.
     modifier onlyAdmin() {
-        require(msg.sender == MainContract.getAdmin(), "This function only admin can execute!");
+        require(msg.sender == adminAddr, "This function only admin can execute!");
         _;
     }
 
     // Modify to check only participant.
     modifier onlyParticipant() {
         // TODO: viet lai modifier nay
-        require(msg.sender != MainContract.getAdmin(), "This function only participant can execute!");
+        require(msg.sender != adminAddr, "This function only participant can execute!");
         _;
     }
 

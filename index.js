@@ -192,11 +192,17 @@ function componentMain() {
         case 'start':
           //TODO: Handle event when User Start a new session
           await contract.methods.startSession().send({ from: state.account });
-          await actions.getSessions();
+
           break;
         case 'stop':
           //TODO: Handle event when User Stop a session
-          alert('stop');
+          await contract.methods.calculateDeviationLatestAndStop().send({ from: state.account });
+
+          break;
+        case 'stop2':
+          const aa = await contract.methods.abc(action.payload.price).call({ from: state.account });
+          console.log(aa);
+
           break;
         case 'pricing':
           //TODO: Handle event when User Pricing a product
@@ -207,12 +213,10 @@ function componentMain() {
         case 'close':
           //TODO: Handle event when User Close a session
           //The inputed Price is stored in `data`
-          await contract.methods.closeSession().send({ from: state.account });
-          await contract.methods.calculateSuggestPrice().send({ from: state.account });
-          console.log('close done!');
-
-          break;
+          await contract.methods.calculateSuggestPriceAndCloseSession(action.payload.price).send({ from: state.account });
       }
+
+      await actions.getSessions();
     },
 
     location: location.actions,
@@ -286,12 +290,13 @@ function componentMain() {
       try {
         const results = await contractFunctions.getAllParticipants()({ from: state.account });
         participants = results.map(item => {
+          console.log(item);
           return {
             address: item.account,
             deviation: item.deviation || 0,
             email: item.email || '',
             fullname: item.fullName || '',
-            nSession: item.numberOfSession || 0,
+            nSessions: item.numberOfSession || 0
           }
         });
       } catch (error) {
@@ -426,20 +431,22 @@ function componentMain() {
 
         let name = sessionDetail[0] || ''; // TODO
         let description = sessionDetail[1] || ''; // TODO
-        let price = 0; // TODO
+        let price = sessionDetail[3] || 0; // TODO
         let image = sessionDetail[2].length > 0 ? sessionDetail[2][0] : ''; // TODO
         let status = sessionDetail[5] || '-'; // TODO
+        let finalPrice = sessionDetail[4] || 0; // TODO
+        let priceFormat = 0;
+        let finalPriceFormat = 0;
 
-        if (index == 0) {
-          console.log(sessionDetail);
-          const a = await contract.methods.getParticipantPricings().call({ from: state.account });
-          log(a);
+        if (price > 0) {
+          priceFormat = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
-        
 
-        // suggestPrice
+        if (finalPrice > 0) {
+          finalPriceFormat = finalPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
 
-        sessions.push({ id, name, description, price, contract, image, status });
+        sessions.push({ id, name, description, price, finalPrice, contract, image, status, priceFormat, finalPriceFormat });
       }
 
       actions.setSessions(sessions);

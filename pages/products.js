@@ -38,12 +38,22 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
 
               <dt class='col-sm-4'>Proposed Price</dt>
               <dd class='col-sm-8'>
-                <p>$ {product.price / 100}</p>
+                {/* <p>$ {product.price / 100}</p> */}
+                <p>$ {product.priceFormat}</p>
+              </dd>
+
+              <dt class='col-sm-4'>Final Price</dt>
+              <dd class='col-sm-8'>
+                <p>$ {product.finalPriceFormat}</p>
               </dd>
 
               <dt class='col-sm-4'>Status</dt>
               <dd class='col-sm-8'>
-                <p>{product.status}</p>
+                <p>
+                <span class={`badge badge-${config.sessionBadgeClasses[product.status]}`}>
+                  {config.SESSION_STATUS_TEXT[product.status] || 'N/A'}
+                </span>
+                </p>
               </dd>
             </dl>
           </div>
@@ -61,9 +71,16 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                   <button
                     class='btn btn-outline-primary'
                     type='button'
-                    onclick={e => fn('stop')}
+                    onclick={e => fn({ type: 'stop', payload: {index: currentProductIndex}})}
                   >
                     Stop
+                  </button>
+                  <button
+                    class='btn btn-outline-primary'
+                    type='button'
+                    onclick={e => fn({ type: 'stop2', payload: {index: currentProductIndex, price}})}
+                  >
+                    Stop 2
                   </button>
                 </div>
                 <input
@@ -193,7 +210,7 @@ const ProductRow = ({ product, index, select, currentIndex }) => (
     <th scope='row'>{product.no}</th>
     <td>{product.name}</td>
     <td>{product.description} </td>
-    <td>$ {product.price}</td>
+    <td>$ {product.priceFormat}</td>
     <td>
       <span class={`badge badge-${config.sessionBadgeClasses[product.status]}`}>
         {config.SESSION_STATUS_TEXT[product.status] || 'N/A'}

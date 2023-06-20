@@ -1,5 +1,5 @@
 exports.config = {
-  mainContract: '0x4E33b6659b930df707589Deb74F731Ba5915D7F7',
+  mainContract: '0xD64ce8AaDDAF02676BCc4372fF358f119f5DE387',
   loginStoreKey: 'LOGIN_STORE_KEY',
   zeroAddress: '0x0000000000000000000000000000000000000000',
   APP_NAME: 'Product Pricing System',
@@ -13,14 +13,14 @@ exports.config = {
   SESSION_STATUS: {
     CREATED: 0,
     PRICING: 1,
-    STOP: 2,
-    CLOSE: 3
+    CLOSE: 2,
+    STOP: 3
   },
   SESSION_STATUS_TEXT: {
     0: 'Created',
     1: 'Pricing',
-    2: 'Stop',
-    3: 'Close'
+    2: 'Close',
+    3: 'Stop'
   },
   sessionBadgeClasses: {
     0: 'success',

@@ -108,12 +108,12 @@ contract Main is IMain {
     }
 
     // Get deviation by participant.
-    function getDeviation(address _account) external view returns (int) {
+    function getDeviation(address _account) public view returns (int) {
         return mapParticipants[_account].deviation;
     }
 
     // Set deviation.
-    function setDeviation(address _account, int _deviation) public onlyAdmin {
+    function setDeviation(address _account, int _deviation) public {
         mapParticipants[_account].deviation = _deviation;
     }
 
@@ -123,7 +123,7 @@ contract Main is IMain {
     }
 
     // Get number of session.
-    function getNumberOfSession(address _account) public view onlyAdmin returns(int) {
+    function getNumberOfSession(address _account) public view returns (int) {
         return mapParticipants[_account].numberOfSession;
     }
 
