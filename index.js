@@ -29,8 +29,6 @@ if (typeof web3 !== 'undefined') {
   }
 
   window.ethereum.on('accountsChanged', async (error) => {
-    console.log('account change');
-    // lam sao de biet day la login
     // logcalStorage.removeItem(config.loginStoreKey);
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
 
@@ -60,7 +58,9 @@ function componentMain() {
     email: ''.replace,
     newProduct: {},
     sessions: [],
-    currentProductIndex: 0
+    currentProductIndex: 0,
+    newParticipant: {},
+    frmParticipantShow: false
   };
 
   // Functions of Main Contract
@@ -100,6 +100,9 @@ function componentMain() {
 
     // Get all participants
     getAllParticipants: () => mainContract.methods.getAllParticipants().call,
+
+    // Add participant
+    addParticipant: (address) => mainContract.methods.addParticipant(address).send,
   };
 
   const actions = {
@@ -203,6 +206,9 @@ function componentMain() {
             isAdmin: currentAccount == admin.toLowerCase(),
             profile
           });
+        } else {
+          localStorage.removeItem(config.loginStoreKey);
+          location.reload();
         }
       } catch (error) {
         console.log(error);
@@ -222,13 +228,21 @@ function componentMain() {
       let participants = [];
 
       // TODO: Load all participants from Main contract.
-      // One participant should contain { address, fullname, email, nSession (numberOfSession) and deviation }
-
-     
-
-      // console.log(state.account);
-      // const result = await contractFunctions.getAllParticipants()({ from: state.account });
-      // console.log(result);
+      // One participant should contain { address, fullname, email, nSession and deviation }
+      try {
+        const results = await contractFunctions.getAllParticipants()({ from: state.account });
+        participants = results.map(item => {
+          return {
+            address: item.account,
+            deviation: item.deviation || 0,
+            email: item.email || '',
+            fullName: item.fullName || '',
+            nSession: item.numberOfSession || 0,
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
 
       actions.setParticipants(participants);
     },
@@ -329,12 +343,37 @@ function componentMain() {
           walletInstalled: false
         };
       }
+    },
+
+    inputNewParticipant: ({ fieldName, value }) => state => {
+      let newParticipant = state.newParticipant;
+      newParticipant[fieldName] = value;
+
+      return {
+        ...state,
+        newParticipant
+      };
+    },
+
+    createNewParticipant: () => async (state, actions) => {
+      try {
+        await contractFunctions.addParticipant(state.newParticipant.address)({ from: state.account });
+        await actions.getParticipants();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    fetchData: () => async (state, actions) => {
+      await actions.getAccount();
+      await actions.getParticipants();
+      await actions.getSessions();
     }
   };
 
   const view = (
     state,
-    { getAccount, getParticipants, register, inputProfile, getSessions, checkWalletInstalled }
+    { fetchData, register, inputProfile }
   ) => {
     // return (<body>Test</body>);
     // console.log(
@@ -344,9 +383,7 @@ function componentMain() {
       <body
         class='app sidebar-show sidebar-fixed'
         oncreate={() => {
-          getAccount();
-          getParticipants();
-          getSessions();
+          fetchData();
         }}
       >
         <div class='app-body'>
