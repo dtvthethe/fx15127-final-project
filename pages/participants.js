@@ -1,6 +1,10 @@
 import { app, h } from 'hyperapp';
 import './participants.css';
+import JSAlert from 'js-alert';
+import Toastify from 'toastify-js'
+import "toastify-js/src/toastify.css"
 import { modalHide, modalShow } from './common/modal.js';
+import { config } from '../config';
 
 const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipant, frmParticipant }) => (
   <div id="userModal" class="modal fade" tabindex="-1" role="dialog">
@@ -109,19 +113,51 @@ const Participants = ({ match }) => (
   }
 
   const openUserEditModal = (address) => {
+    const results = participants.filter((item) => {
+      return item.address === address;
+    });
+
+    if (results.length == 0) {
+      Toastify({
+        text: 'Participant not found!',
+        position: 'center',
+        backgroundColor: config.color.success
+      }).showToast();
+      return;
+    }
+
+    const part = results[0];
     frmAdd(false, true);
     modalShow('userModal');
-    resetForm(address);
+    resetForm(address, part.fullname, part.email);
   }
 
   const handleOnCreateParticipant = async () => {
-    if (frmParticipant.txtAddress === true) {
-      await register(false);
-    } else {
-      await createNewParticipant();
-    }
-
     modalHide('userModal');
+    const loading = JSAlert.loader('Please wait...');
+
+    try {
+      if (frmParticipant.txtAddress === true) {
+        await register(false);
+      } else {
+        await createNewParticipant();
+      }
+    
+      loading.dismiss();
+      Toastify({
+        text: 'Participant saved!',
+        position: 'center',
+        backgroundColor: config.color.success
+      }).showToast();
+    } catch (error) {
+      console.log(error);
+      loading.dismiss();
+      Toastify({
+        text: 'Error on handle save participant!',
+        position: 'center',
+        backgroundColor: config.color.error
+      }).showToast();
+    }
   }
 
   const resetForm = (address = '', fullname = '', email = '') => {

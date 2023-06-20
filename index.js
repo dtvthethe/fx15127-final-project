@@ -8,11 +8,11 @@ import { promisify } from 'util';
 import './css/vendor/bootstrap.css';
 import './css/vendor/coreui.css';
 import './css/index.css';
-import './css/style.css';
 import Main from './contracts/Main.json';
 import Session from './contracts/Session.json';
 import { InstallMetaMask } from './pages/installMetaMask';
 import { Login } from './pages/login';
+import JSAlert from 'js-alert';
 
 const Fragment = (props, children) => children;
 
@@ -33,6 +33,11 @@ if (typeof web3 !== 'undefined') {
 
     if (accounts.length === 0 || (accounts.length > 0 && accounts[0] === config.zeroAddress)) {
       localStorage.removeItem(config.loginStoreKey);
+      window.location.replace('/');
+    }
+
+    if (accounts[0] !== localStorage.getItem(config.loginStoreKey)) {
+      localStorage.setItem(config.loginStoreKey, accounts[0]);
       window.location.replace('/');
     }
   });
@@ -215,7 +220,9 @@ function componentMain() {
           });
         } else {
           localStorage.removeItem(config.loginStoreKey);
-          window.location.replace('/');
+          JSAlert.alert('This account is not exist in Participant List. Please switch to Admin account to add this!', null, JSAlert.Icons.Failed).then(() => {
+            window.location.replace('/');
+          });
         }
       } catch (error) {
         console.log(error);
@@ -236,6 +243,12 @@ function componentMain() {
 
       // TODO: Load all participants from Main contract.
       // One participant should contain { address, fullname, email, nSession and deviation }
+      if (!state.isAdmin) {
+        actions.setParticipants(participants);
+
+        return;
+      }
+
       try {
         const results = await contractFunctions.getAllParticipants()({ from: state.account });
         participants = results.map(item => {
@@ -287,13 +300,14 @@ function componentMain() {
             )({ from: currentAccount });
             await actions.getParticipants();
           }
-          
         } else {
-          // await contractFunctions.register(
-          //   state.profile.fullname,
-          //   state.profile.email
-          // ).send({ from: currentAccount });
-          alert('You are not admin');
+          if (isUpdateProfile) {
+            await contractFunctions.register(
+              currentAccount,
+              state.profile.fullname,
+              state.profile.email
+            )({ from: currentAccount });
+          }
         }
       } catch (error) {
         console.log(error);
@@ -393,8 +407,17 @@ function componentMain() {
       }
     },
 
+    checkPermission: () => (state, actions) => {
+      if (state.isAdmin === false && config.onlyAdminPages.includes(state.location.pathname)) {
+        JSAlert.alert('Only admin can access this page!', null, JSAlert.Icons.Failed).then(() => {
+          window.location.replace('/');
+        });
+      }
+    },
+
     fetchData: () => async (state, actions) => {
       await actions.getAccount();
+      await actions.checkPermission();
       await actions.getParticipants();
       await actions.getSessions();
     }

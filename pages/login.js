@@ -1,4 +1,5 @@
 import { h, app } from "hyperapp";
+import './login.css';
 import { InstallMetaMask } from "./installMetaMask";
 import { config } from "../config";
 

@@ -4689,6 +4689,13 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha512-Yljz7ffyPbrLpLngrMtZ7NduUgVvi6wG9RJ9IUcyCd59YQ911PBJphODUcbOVbqYfxe1wuYf/LJ8PauMRwsM/g==
 
+js-alert@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/js-alert/-/js-alert-2.0.0.tgz#d10553975862ef2434023f0b80d0cdcd438ca86d"
+  integrity sha512-YS7ikJqnpHKdSoODFFXA7K53yCUqBSokihQRAXx9i7NnzAkRx1Bjw0bk6w2M+ntUIQEAbOHmnEuZ+kXQMGUFLQ==
+  dependencies:
+    light-sanitize-html "^1.0.2"
+
 js-sha3@0.8.0, js-sha3@^0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
@@ -4865,6 +4872,11 @@ levn@~0.3.0:
   dependencies:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
+
+light-sanitize-html@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/light-sanitize-html/-/light-sanitize-html-1.0.2.tgz#4238383d20d1b0a1aaac7f8173ff6ff7d024cf4d"
+  integrity sha512-Qpx8uxFhw4bREIMMLqGcFomxjRBsOen2eLOfybbGmr9xaP6dvh8rmQ9vFbgsGR/iX4fskTsIIm0yuG88pSvtfQ==
 
 lodash.clone@^4.5.0:
   version "4.5.0"
@@ -5126,11 +5138,6 @@ mock-fs@^4.1.0:
   version "4.14.0"
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-4.14.0.tgz#ce5124d2c601421255985e6e94da80a7357b1b18"
   integrity sha512-qYvlv/exQ4+svI3UOvPUpLDF0OMX5euvUH0Ny4N5QyRyhNdgAgUrVH3iUINSzEPLvx0kbo/Bp28GJKIqvE7URw==
-
-modal-vanilla@^0.12.0:
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/modal-vanilla/-/modal-vanilla-0.12.0.tgz#ee4380f95c270ed2c5f60c871084670e8704f366"
-  integrity sha512-RkLH+I7QBBMojN89jEPi0E9yZNltQCY6RVYih7/VmSNzbIbuJTMUAPcugBoX5SUpkfjSaCKZ3B4p89M1bND1Sg==
 
 ms@2.0.0:
   version "2.0.0"
@@ -7114,6 +7121,11 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     extend-shallow "^3.0.2"
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
+
+toastify-js@^1.12.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/toastify-js/-/toastify-js-1.12.0.tgz#cc1c4f5c7e7380e854e20bedceb51980ea29f64d"
+  integrity sha512-HeMHCO9yLPvP9k0apGSdPUWrUbLnxUKNFzgUoZp1PHCLploIX/4DSQ7V8H25ef+h4iO9n0he7ImfcndnN6nDrQ==
 
 toidentifier@1.0.1:
   version "1.0.1"
