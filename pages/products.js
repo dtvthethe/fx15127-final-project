@@ -1,10 +1,14 @@
 import { app, h } from 'hyperapp';
 import './products.css';
+import JSAlert from 'js-alert';
+import Toastify from 'toastify-js'
+import "toastify-js/src/toastify.css"
+import { config } from '../config';
 
 const Fragment = (props, children) => children;
 
-const Product = ({ product, newProduct, input, create, isAdmin, fn }) => {
-  let price;
+const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProductIndex }) => {
+  let price = null;
   return (
     <>
       {product ? (
@@ -51,7 +55,7 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn }) => {
                   <button
                     class='btn btn-outline-primary'
                     type='button'
-                    onclick={e => fn('start')}
+                    onclick={e => fn({ type: 'start', index: currentProductIndex })}
                   >
                     Start
                   </button>
@@ -88,82 +92,91 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn }) => {
                   class='form-control'
                   placeholder='price'
                   oninput={e => (price = e.target.value)}
+                  disabled={product.status != config.SESSION_STATUS.PRICING}
                 />
                 <div class='input-group-append'>
-                  <button class='btn btn-primary' type='button'>
+                  <button class='btn btn-primary' type='button' disabled={product.status != config.SESSION_STATUS.PRICING}>
                     Propose price
                   </button>
                 </div>
               </div>
+              {product.status != config.SESSION_STATUS.PRICING
+                ? (<div class='input-group text-center'>
+                  <p class='w-100 mb-0 mt-1'>This input only enable when Session status is PRICING</p>
+                </div>)
+                : <></>}
             </div>
           )}
         </div>
       ) : (
         <></>
       )}
-      <div class='card'>
-        <div class='card-header'>
-          <strong>Create new session</strong>
-        </div>
-        <div class='card-body'>
-          <div class='row'>
-            <div class='col-sm-12'>
-              <div class='form-group'>
-                <label for='name'>Product name</label>
-                <input
-                  type='text'
-                  class='form-control'
-                  id='name'
-                  value={newProduct.name}
-                  oninput={e => {
-                    input({ field: 'name', value: e.target.value });
-                  }}
-                />
-              </div>
-            </div>
-          </div>
 
-          <div class='row'>
-            <div class='col-sm-12'>
-              <div class='form-group'>
-                <label for='description'>Product description</label>
-                <input
-                  type='text'
-                  class='form-control'
-                  id='description'
-                  value={newProduct.description}
-                  oninput={e => {
-                    input({ field: 'description', value: e.target.value });
-                  }}
-                />
+      {
+        isAdmin && (<div class='card'>
+          <div class='card-header'>
+            <strong>Create new session</strong>
+          </div>
+          <div class='card-body'>
+            <div class='row'>
+              <div class='col-sm-12'>
+                <div class='form-group'>
+                  <label for='name'>Product name</label>
+                  <input
+                    type='text'
+                    class='form-control'
+                    id='name'
+                    value={newProduct.name}
+                    oninput={e => {
+                      input({ field: 'name', value: e.target.value });
+                    }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class='row'>
-            <div class='col-sm-12'>
-              <div class='form-group'>
-                <label for='image'>Product image</label>
-                <input
-                  type='text'
-                  class='form-control'
-                  id='image'
-                  placeholder='http://'
-                  value={newProduct.image}
-                  oninput={e => {
-                    input({ field: 'image', value: e.target.value });
-                  }}
-                />
+            <div class='row'>
+              <div class='col-sm-12'>
+                <div class='form-group'>
+                  <label for='description'>Product description</label>
+                  <input
+                    type='text'
+                    class='form-control'
+                    id='description'
+                    value={newProduct.description}
+                    oninput={e => {
+                      input({ field: 'description', value: e.target.value });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-sm-12'>
+                <div class='form-group'>
+                  <label for='image'>Product image</label>
+                  <input
+                    type='text'
+                    class='form-control'
+                    id='image'
+                    placeholder='http://'
+                    value={newProduct.image}
+                    oninput={e => {
+                      input({ field: 'image', value: e.target.value });
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class='card-footer'>
-          <button type='submit' class='btn btn-primary' onclick={create}>
-            Create
-          </button>
-        </div>
-      </div>
+          <div class='card-footer'>
+            <button type='submit' class='btn btn-primary' onclick={create}>
+              Create
+            </button>
+          </div>
+        </div>)
+      }
     </>
   );
 };
@@ -177,13 +190,58 @@ const ProductRow = ({ product, index, select, currentIndex }) => (
     <td>{product.name}</td>
     <td>{product.description} </td>
     <td>$ {product.price}</td>
-    <td>{product.status}</td>
+    <td>{config.SESSION_STATUS_TEXT[product.status] || 'N/A'}</td>
   </tr>
 );
+
 const Products = ({ match }) => (
   { newProduct, sessions, currentProductIndex, isAdmin },
   { inputNewProduct, createProduct, selectProduct, sessionFn }
 ) => {
+  const handleSessionFn = async (params) => {
+    const loading = JSAlert.loader('Please wait...');
+
+    try {
+      await sessionFn(params);
+      loading.dismiss();
+      Toastify({
+        text: 'Session status saved!',
+        position: 'center',
+        backgroundColor: config.color.success
+      }).showToast();
+    } catch (error) {
+      console.log(error);
+      loading.dismiss();
+      Toastify({
+        text: 'Error on handle update session status!',
+        position: 'center',
+        backgroundColor: config.color.error
+      }).showToast();
+    }
+  }
+
+  const create = async () => {
+    const loading = JSAlert.loader('Please wait...');
+
+    try {
+      await createProduct();
+      loading.dismiss();
+      Toastify({
+        text: 'Session saved!',
+        position: 'center',
+        backgroundColor: config.color.success
+      }).showToast();
+    } catch (error) {
+      console.log(error);
+      loading.dismiss();
+      Toastify({
+        text: 'Error on handle create Session!',
+        position: 'center',
+        backgroundColor: config.color.error
+      }).showToast();
+    }
+  }
+
   return (
     <div class='d-flex w-100 h-100'>
       <div class='bg-white border-right products-list'>
@@ -218,10 +276,11 @@ const Products = ({ match }) => (
         <Product
           newProduct={newProduct}
           input={inputNewProduct}
-          create={createProduct}
+          create={create}
           product={sessions[currentProductIndex]}
           isAdmin={isAdmin}
-          fn={sessionFn}
+          fn={handleSessionFn}
+          currentProductIndex={currentProductIndex}
         ></Product>
       </div>
     </div>

@@ -132,10 +132,6 @@ contract Main is IMain {
         return sessions;
     }
 
-    function getAllSessions() public view returns (address[] memory) {
-        return sessions;
-    }
-
     // Get number of session.
     function nSessions() public view returns (uint) {
         return sessions.length;

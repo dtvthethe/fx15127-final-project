@@ -115,6 +115,15 @@ function componentMain() {
 
     // Add participant
     addParticipant: (address) => mainContract.methods.addParticipant(address).send,
+
+    // Creat new session
+    createSession: (productName, description, images) => mainContract.methods.createSession(productName, description, images).send,
+
+    // Get session address
+    getAllSessionAddresses: () => mainContract.methods.getAllSessionAddresses().call,
+
+    // Get session detail
+    getSessionDetail: (address) => mainContract.methods.getSessionDetail(address).call,
   };
 
   const actions = {
@@ -129,7 +138,7 @@ function componentMain() {
 
     inputNewProduct: ({ field, value }) => state => {
       let newProduct = state.newProduct || {};
-      newProduct[field] = value;
+      newProduct[field] = field === 'image' ? [value] : value;
       return {
         ...state,
         newProduct
@@ -137,20 +146,26 @@ function componentMain() {
     },
 
     createProduct: () => async (state, actions) => {
-      let contract = new web3js.eth.Contract(Session.abi, {
-        data: Session.bytecode
-      });
-      await contract
-        .deploy({
-          arguments: [
-            // TODO: Argurment when Deploy the Session Contract
-            // It must be matched with Session.sol Contract Constructor
-            // Hint: You can get data from `state`
-          ]
-        })
-        .send({ from: state.account });
+      // let contract = new web3js.eth.Contract(Session.abi, {
+      //   data: Session.bytecode
+      // });
+      // await contract
+      //   .deploy({
+      //     arguments: [
+      //       // TODO: Argurment when Deploy the Session Contract
+      //       // It must be matched with Session.sol Contract Constructor
+      //       // Hint: You can get data from `state`
+      //     ]
+      //   })
+      //   .send({ from: state.account });
 
-      actions.getSessions();
+      // actions.getSessions();
+
+      // my code
+
+      // console.log(state.newProduct);
+      await contractFunctions.createSession(state.newProduct.name, state.newProduct.description, state.newProduct.image)({ from: state.account });
+      await actions.getSessions();
     },
 
     selectProduct: i => state => {
@@ -159,23 +174,32 @@ function componentMain() {
       };
     },
 
-    sessionFn: (action, data) => (state, { }) => {
-      switch (action) {
+    sessionFn: (action, data) => async (state, actions) => {
+      const session = state.sessions[action.index];
+      if (session == undefined || session == null || session.length == 0) {
+        return;
+      }
+      const contract = session.contract;
+
+      switch (action.type) {
         case 'start':
           //TODO: Handle event when User Start a new session
+          await contract.methods.startSession().send({ from: state.account });
+          await actions.getSessions();
           break;
         case 'stop':
           //TODO: Handle event when User Stop a session
-
+          alert('stop');
           break;
         case 'pricing':
           //TODO: Handle event when User Pricing a product
           //The inputed Price is stored in `data`
-
+          alert('pricing ???? admin should have an other case -> cai nay la cua admin');
           break;
         case 'close':
           //TODO: Handle event when User Close a session
           //The inputed Price is stored in `data`
+          alert('close');
 
           break;
       }
@@ -329,15 +353,43 @@ function componentMain() {
     },
 
     getSessions: () => async (state, actions) => {
-      // TODO: Get the number of Sessions stored in Main contract
-      let nSession = await contractFunctions.nSessions();
-      let sessions = [];
+      // // TODO: Get the number of Sessions stored in Main contract
+      // let nSession = await contractFunctions.nSessions();
+      // let sessions = [];
 
-      // TODO: And loop through all sessions to get information
+      // // TODO: And loop through all sessions to get information
+
+      // for (let index = 0; index < nSession; index++) {
+      //   // Get session address
+      //   let session = await contractFunctions.sessions(index)();
+      //   console.log(session);
+      //   // Load the session contract on network
+      //   let contract = new web3js.eth.Contract(Session.abi, session);
+
+      //   let id = session;
+
+      //   // TODO: Load information of session.
+      //   // Hint: - Call methods of Session contract to reveal all nessesary information
+      //   //       - Use `await` to wait the response of contract
+
+      //   let name = ''; // TODO
+      //   let description = ''; // TODO
+      //   let price = 0; // TODO
+      //   let image = ''; // TODO
+
+      //   sessions.push({ id, name, description, price, contract, image });
+      // }
+      // actions.setSessions(sessions);
+
+      // my code
+
+      const results = await contractFunctions.getAllSessionAddresses()({ from: state.account });
+      const nSession = results.length;
+      let sessions = [];
 
       for (let index = 0; index < nSession; index++) {
         // Get session address
-        let session = await contractFunctions.sessions(index)();
+        let session = results[index];
         // Load the session contract on network
         let contract = new web3js.eth.Contract(Session.abi, session);
 
@@ -346,14 +398,17 @@ function componentMain() {
         // TODO: Load information of session.
         // Hint: - Call methods of Session contract to reveal all nessesary information
         //       - Use `await` to wait the response of contract
+        const sessionDetail = await contract.methods.getSessionDetail().call({ from: state.account });
 
-        let name = ''; // TODO
-        let description = ''; // TODO
+        let name = sessionDetail[0] || ''; // TODO
+        let description = sessionDetail[1] || ''; // TODO
         let price = 0; // TODO
-        let image = ''; // TODO
+        let image = sessionDetail[2].length > 0 ? sessionDetail[2][0] : ''; // TODO
+        let status = sessionDetail[5] || '-'; // TODO
 
-        sessions.push({ id, name, description, price, contract, image });
+        sessions.push({ id, name, description, price, contract, image, status });
       }
+
       actions.setSessions(sessions);
     },
 

@@ -25,7 +25,7 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   placeholder='0x94645E...'
                   value={newParticipant.address}
                   disabled={frmParticipant.txtAddress}
-                  required
+                  maxlength="50"
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'address', value: e.target.value });
                   }}
@@ -40,6 +40,7 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   placeholder='John Doe'
                   value={newParticipant.fullname}
                   disabled={frmParticipant.txtFullname}
+                  maxlength="120"
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'fullname', value: e.target.value });
                   }}
@@ -54,6 +55,7 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   placeholder='example@email.com'
                   value={newParticipant.email}
                   disabled={frmParticipant.txtEmail}
+                  maxlength="120"
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'email', value: e.target.value });
                   }}

@@ -20,7 +20,7 @@ contract Session {
     IMain MainContract;
 
     // TODO: Variables
-    enum SESSION_STATUS {CREATED, INPROGRESS, CLOSE}
+    enum SESSION_STATUS {CREATED, PRICING, CLOSE, STOP}
 
     string private productName;
     string private description;
@@ -65,30 +65,39 @@ contract Session {
     }
 
     // TODO: Functions
-    // Set status to INPROGRESS.
+    // ..CREATED.. -> PRICING -> CLOSE -> STOP
+    // Update session status to PRICING.
     function startSession() public onlyAdmin {
-        status = SESSION_STATUS.INPROGRESS;
-
-        emit StartSession("Start session success!");
+        require(status == SESSION_STATUS.CREATED, "Session status must be CREATED");
+        status = SESSION_STATUS.PRICING;
+        emit UpdateSessionStatus("Update session status to PRICING");
     }
 
-    // Set status to CLOSE.
+    // Update session status to CLOSE.
     function closeSession() public onlyAdmin {
+        require(status == SESSION_STATUS.PRICING, "Session status must be PRICING");
         status = SESSION_STATUS.CLOSE;
-        emit CloseSession("Close session success!");
+        emit UpdateSessionStatus("Update session status to CLOSE");
+    }
+
+    // Update session status to STOP.
+    function stopSession() public onlyAdmin {
+        require(status == SESSION_STATUS.CLOSE, "Session status must be CLOSE");
+        status = SESSION_STATUS.STOP;
+        emit UpdateSessionStatus("Update session status to STOP");
     }
 
     // Participant pricing.
-    function pricing(address _account, int _price) public onlyParticipant onlyInProgress {
-        mapParticipantPricings[_account] = _price;
+    function pricing(int _price) public onlyParticipant onlyInProgress {
+        mapParticipantPricings[msg.sender] = _price;
 
-        if (mapParticipantPricings[_account] == 0) {
+        if (mapParticipantPricings[msg.sender] == 0) {
             // check this work?
-            participantPricings.push(_account);
-            MainContract.incrementNumberOfSession(_account);
+            participantPricings.push(msg.sender);
+            MainContract.incrementNumberOfSession(msg.sender);
         }
 
-        emit Pricing(_account, "Pricing success!");
+        emit Pricing(msg.sender, "Pricing success!");
     }
 
     // Get session detail.
@@ -128,9 +137,9 @@ contract Session {
         MainContract.setDeviation(_account, _newDeviation);
     }
 
-    // Modify only status is INPROGRESS.
+    // Modify only status is PRICING.
     modifier onlyInProgress {
-        require(status == SESSION_STATUS.INPROGRESS, "Session is not in progress");
+        require(status == SESSION_STATUS.PRICING, "Session is not in progress");
         _;
     }
 
@@ -159,11 +168,8 @@ contract Session {
     // Event update session.
     event UpdateSession(string _productName, string _description, string _msg);
 
-    // Event start session.
-    event StartSession(string _msg);
-
-    // Event close session.
-    event CloseSession(string _msg);
+    // Event update session status.
+    event UpdateSessionStatus(string _msg);
 
     // Event pricing.
     event Pricing(address _account, string _msg);
