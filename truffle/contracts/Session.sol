@@ -76,26 +76,10 @@ contract Session {
         emit UpdateSessionStatus("Update session status to PRICING");
     }
 
-    // Update session status to CLOSE.
-    // function closeSession() public onlyAdmin {
-    //     require(status == SESSION_STATUS.PRICING, "Session status must be PRICING");
-    //     status = SESSION_STATUS.CLOSE;
-    //     emit UpdateSessionStatus("Update session status to CLOSE");
-    // }
-
+    // Get participant pricings.
     function getParticipantPricings() public view returns (address[] memory) {
         return participantPricings;
     }
-
-    // function getParticipantPricings() public view returns (address[]) {
-    //     address[] arr = [];
-
-    //     for (uint i = 0; i < participantPricings.length; i++) {
-    //         arr.push(participantPricings[i]);
-    //     }
-
-    //     return arr;
-    // }
 
     // Update session status to STOP.
     function stopSession() public onlyAdmin {
@@ -109,7 +93,6 @@ contract Session {
         if (isParticipantPricingExists[msg.sender] == false) {
             isParticipantPricingExists[msg.sender] = true;
             participantPricings.push(msg.sender);
-            MainContract.incrementNumberOfSession(msg.sender);
         }
 
         mapParticipantPricings[msg.sender] = _price;
@@ -144,7 +127,6 @@ contract Session {
         int _subDeviation = (finalPrice - mapParticipantPricings[_account]).abs();
         int _subDeviationResult = ((_subDeviation * 10**18) / finalPrice) * 100;
 
-        // return _subDeviationResult / 10**16;
         return _subDeviationResult / 10**18;
     }
 
@@ -157,6 +139,7 @@ contract Session {
             int _newDeviation = _subDeviation / (_deviation + 1);
 
             MainContract.setDeviation(_account, _newDeviation);
+            MainContract.incrementNumberOfSession(_account);
         }
 
         status = SESSION_STATUS.STOP;

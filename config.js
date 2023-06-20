@@ -1,5 +1,5 @@
 exports.config = {
-  mainContract: '0xD64ce8AaDDAF02676BCc4372fF358f119f5DE387',
+  mainContract: '0xdd23f2b247b114184af10F3b905547cbae5Be47B',
   loginStoreKey: 'LOGIN_STORE_KEY',
   zeroAddress: '0x0000000000000000000000000000000000000000',
   APP_NAME: 'Product Pricing System',
