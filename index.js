@@ -13,6 +13,10 @@ import Session from './contracts/Session.json';
 import { InstallMetaMask } from './pages/installMetaMask';
 import { Login } from './pages/login';
 import JSAlert from 'js-alert';
+import Toastify from 'toastify-js'
+import "toastify-js/src/toastify.css"
+import { Home } from './pages/home';
+import { log } from 'console';
 
 const Fragment = (props, children) => children;
 
@@ -72,7 +76,8 @@ function componentMain() {
       txtAddress: true,
       txtFullname: true,
       txtEmail: true,
-    }
+    },
+    titlePage: '...'
   };
 
   // Functions of Main Contract
@@ -174,11 +179,13 @@ function componentMain() {
       };
     },
 
-    sessionFn: (action, data) => async (state, actions) => {
-      const session = state.sessions[action.index];
+    sessionFn: (action) => async (state, actions) => {
+      const session = state.sessions[action.payload.index];
+
       if (session == undefined || session == null || session.length == 0) {
         return;
       }
+
       const contract = session.contract;
 
       switch (action.type) {
@@ -189,17 +196,24 @@ function componentMain() {
           break;
         case 'stop':
           //TODO: Handle event when User Stop a session
-          alert('stop');
+          // alert('stop');
+          await contract.methods.calculateDeviationLatestAndStop().send({ from: state.account });
+          // await contract.methods.calculateSuggestPrice().send({ from: state.account });
           break;
         case 'pricing':
           //TODO: Handle event when User Pricing a product
           //The inputed Price is stored in `data`
-          alert('pricing ???? admin should have an other case -> cai nay la cua admin');
+          await contract.methods.pricing(action.payload.price).send({ from: state.account });
+
           break;
         case 'close':
           //TODO: Handle event when User Close a session
           //The inputed Price is stored in `data`
-          alert('close');
+          // await contract.methods.closeSession().send({ from: state.account });
+          await contract.methods.calculateSuggestPriceAndCloseSession().send({ from: state.account });
+          // await contract.methods.calculateSuggestPriceAndCloseSession().send({ from: state.account });
+
+          console.log('close done!');
 
           break;
       }
@@ -281,7 +295,7 @@ function componentMain() {
             deviation: item.deviation || 0,
             email: item.email || '',
             fullname: item.fullName || '',
-            nSession: item.numberOfSession || 0,
+            nSessions: item.numberOfSession || 0
           }
         });
       } catch (error) {
@@ -307,6 +321,7 @@ function componentMain() {
 
     register: (isUpdateProfile) => async (state, actions) => {
       // TODO: Register new participant
+      const loading = JSAlert.loader('Please wait...');
       const currentAccount = localStorage.getItem(config.loginStoreKey);
 
       try {
@@ -322,6 +337,7 @@ function componentMain() {
               state.newParticipant.fullname,
               state.newParticipant.email
             )({ from: currentAccount });
+            await actions.fetchBalance();
             await actions.getParticipants();
           }
         } else {
@@ -333,16 +349,26 @@ function componentMain() {
             )({ from: currentAccount });
           }
         }
+
+        Toastify({
+          text: 'Profile saved, Fetching balance...',
+          position: 'center',
+          backgroundColor: config.color.success
+        }).showToast();
       } catch (error) {
+        Toastify({
+          text: 'Error profile update',
+          position: 'center',
+          backgroundColor: config.color.error
+        }).showToast();
         console.log(error);
       }
 
-      // const profile = {};
-      // TODO: And get back the information of created participant
       if (isUpdateProfile) {
         const profile = state.isAdmin
           ? await contractFunctions.getAdminProfile()({ from: currentAccount })
           : await contractFunctions.participants(currentAccount)({ from: currentAccount });
+        await actions.fetchBalance();
 
         actions.setProfile({
           ...state.profile,
@@ -350,6 +376,8 @@ function componentMain() {
           fullname: profile.fullName || ''
         });
       }
+
+      loading.dismiss();
     },
 
     getSessions: () => async (state, actions) => {
@@ -402,11 +430,16 @@ function componentMain() {
 
         let name = sessionDetail[0] || ''; // TODO
         let description = sessionDetail[1] || ''; // TODO
-        let price = 0; // TODO
+        let price = sessionDetail[3] || 0; // TODO
         let image = sessionDetail[2].length > 0 ? sessionDetail[2][0] : ''; // TODO
         let status = sessionDetail[5] || '-'; // TODO
+        let priceFormat = 0;
 
-        sessions.push({ id, name, description, price, contract, image, status });
+        if (price > 0) {
+          priceFormat = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        sessions.push({ id, name, description, price, contract, image, status, priceFormat });
       }
 
       actions.setSessions(sessions);
@@ -454,11 +487,26 @@ function componentMain() {
     },
 
     createNewParticipant: () => async (state, actions) => {
+      const loading = JSAlert.loader('Please wait...');
+
       try {
         await contractFunctions.addParticipant(state.newParticipant.address)({ from: state.account });
+        await actions.fetchBalance();
         await actions.getParticipants();
+        loading.dismiss();
+        Toastify({
+          text: 'Participant saved!',
+          position: 'center',
+          backgroundColor: config.color.success
+        }).showToast();
       } catch (error) {
         console.log(error);
+        loading.dismiss();
+        Toastify({
+          text: 'Error on handle save participant!',
+          position: 'center',
+          backgroundColor: config.color.error
+        }).showToast();
       }
     },
 
@@ -470,12 +518,17 @@ function componentMain() {
       }
     },
 
+    fetchBalance: () => async (state, actions) => {
+      let balance = await contractFunctions.getBalance(state.account);
+      state.balance = balance;
+    },
+
     fetchData: () => async (state, actions) => {
       await actions.getAccount();
       await actions.checkPermission();
       await actions.getParticipants();
       await actions.getSessions();
-    }
+    },
   };
 
   const view = (
@@ -506,6 +559,7 @@ function componentMain() {
             <div class='h-100  w-100'>
               <Route path='/products' render={Products}></Route>
               <Route path='/participants' render={Participants}></Route>
+              <Route path='/' render={Home}></Route>
             </div>
           </main>
         </div>
@@ -513,6 +567,7 @@ function componentMain() {
     );
   };
 
+  document.title = `Home | ${config.APP_NAME}` || 'N/A';
   const el = document.body;
   const main = app(state, actions, view, el);
   const unsubscribe = location.subscribe(main.location);
@@ -526,6 +581,8 @@ function componentInstalWallet() {
       <InstallMetaMask />
     </body>
   );
+
+  document.title = `Install MetaMask | ${config.APP_NAME}` || 'N/A';
   app(state, actions, view, document.body)
 };
 
@@ -537,5 +594,7 @@ function componentLogin() {
       <Login />
     </body>
   );
+
+  document.title = `Login | ${config.APP_NAME}` || 'N/A';
   app(state, actions, view, document.body)
 };

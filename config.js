@@ -1,7 +1,8 @@
 exports.config = {
-  mainContract: '0xbfF07F46aE3EdfBad3d645219F530f49cCD0d7F4',
+  mainContract: '0x8D08f8f36301900B2F387F53612911Ad3d0Dc906',
   loginStoreKey: 'LOGIN_STORE_KEY',
   zeroAddress: '0x0000000000000000000000000000000000000000',
+  APP_NAME: 'Product Pricing System',
   onlyAdminPages: [
     '/participants',
   ],
@@ -20,5 +21,11 @@ exports.config = {
     1: 'Pricing',
     2: 'Stop',
     3: 'Close'
+  },
+  sessionBadgeClasses: {
+    0: 'success',
+    1: 'warning',
+    2: 'danger',
+    3: 'secondary'
   }
 };

@@ -1,0 +1,8 @@
+.if tr td {
+    padding: 10px;
+}
+
+.if tr td.eg {
+    text-align: center;
+    font-weight: bold;
+}
