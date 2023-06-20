@@ -5,7 +5,6 @@ const Fragment = (props, children) => children;
 
 const Profile = ({ profile, register, inputProfile }) => {
   const hasProfile = profile && profile.nSessions > 0;
-  let newProfile = {};
   if (profile) {
     return hasProfile ? (
       <>
@@ -72,7 +71,7 @@ const Profile = ({ profile, register, inputProfile }) => {
           <button
             class='btn  btn-sm btn-ghost-primary btn-block '
             type='button'
-            onclick={register}
+            onclick={() => register(true)}
           >
             Register
           </button>
@@ -133,13 +132,17 @@ const Sidebar = ({
           <li class='nav-title'>View all</li>
           <li class='nav-item'>
             <Link class='nav-link' to='/products'>
-              <i class='nav-icon cui-balance-scale'></i> Products
+              <i class='fa-solid fa-scale-balanced'></i> Products
             </Link>
           </li>
           <li class='nav-item'>
-            <Link class='nav-link' to='/participants'>
-              <i class='nav-icon cui-people'></i> Participants
-            </Link>
+            {
+            isAdmin
+              ? (<Link class='nav-link' to='/participants'>
+                <i class='fa-solid fa-users'></i> Participants
+              </Link>)
+              : <a class="nav-link cursor-no-drop" style="color: #747474"><i class='fa-solid fa-users'></i> Participants</a>
+            }
           </li>
         </ul>
       </nav>

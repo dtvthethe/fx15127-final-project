@@ -62,6 +62,7 @@ contract Main is IMain {
 
     // Add participant.
     function addParticipant(address _account) public onlyAdmin onlyInNumberOfRangeParticipant {
+        require(_account != admin, "Can not add admin address to participant list!");
         mapParticipants[_account] = IParticipant(_account, "", "", 0, 0);
         participantItems.push(_account);
         emit AddParticipant(_account, "Add participant success!");
