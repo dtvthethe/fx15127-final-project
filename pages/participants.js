@@ -1,8 +1,7 @@
 import { app, h } from 'hyperapp';
 import './participants.css';
 import JSAlert from 'js-alert';
-import Toastify from 'toastify-js'
-import "toastify-js/src/toastify.css"
+import Toastify from 'toastify-js';
 import { modalHide, modalShow } from './common/modal.js';
 import { config } from '../config';
 
@@ -108,6 +107,8 @@ const Participants = ({ match }) => (
   { participants, newParticipant, frmParticipant },
   { inputNewParticipant, createNewParticipant, setFrmParticipant, register }
 ) => {
+  document.title = `Participants | ${config.APP_NAME}` || 'N/A';
+
   const openUserModal = () => {
     frmAdd(true, false);
     modalShow('userModal');
@@ -136,7 +137,6 @@ const Participants = ({ match }) => (
 
   const handleOnCreateParticipant = async () => {
     modalHide('userModal');
-    const loading = JSAlert.loader('Please wait...');
 
     try {
       if (frmParticipant.txtAddress === true) {
@@ -144,21 +144,7 @@ const Participants = ({ match }) => (
       } else {
         await createNewParticipant();
       }
-    
-      loading.dismiss();
-      Toastify({
-        text: 'Participant saved!',
-        position: 'center',
-        backgroundColor: config.color.success
-      }).showToast();
     } catch (error) {
-      console.log(error);
-      loading.dismiss();
-      Toastify({
-        text: 'Error on handle save participant!',
-        position: 'center',
-        backgroundColor: config.color.error
-      }).showToast();
     }
   }
 

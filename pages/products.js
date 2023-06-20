@@ -1,8 +1,7 @@
 import { app, h } from 'hyperapp';
 import './products.css';
 import JSAlert from 'js-alert';
-import Toastify from 'toastify-js'
-import "toastify-js/src/toastify.css"
+import Toastify from 'toastify-js';
 import { config } from '../config';
 
 const Fragment = (props, children) => children;
@@ -55,7 +54,7 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                   <button
                     class='btn btn-outline-primary'
                     type='button'
-                    onclick={e => fn({ type: 'start', index: currentProductIndex })}
+                    onclick={e => fn({ type: 'start', payload: {index: currentProductIndex} })}
                   >
                     Start
                   </button>
@@ -77,7 +76,7 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                   <button
                     class='btn btn-outline-primary'
                     type='button'
-                    onclick={e => fn('pricing', price)}
+                    onclick={e => fn({ type: 'close', payload: {index: currentProductIndex, price}})}
                   >
                     Set price and close
                   </button>
@@ -95,14 +94,19 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                   disabled={product.status != config.SESSION_STATUS.PRICING}
                 />
                 <div class='input-group-append'>
-                  <button class='btn btn-primary' type='button' disabled={product.status != config.SESSION_STATUS.PRICING}>
+                  <button
+                    class='btn btn-primary'
+                    type='button'
+                    disabled={product.status != config.SESSION_STATUS.PRICING}
+                    onclick={e => fn({ type: 'pricing', payload: {index: currentProductIndex, price}})}
+                  >
                     Propose price
                   </button>
                 </div>
               </div>
               {product.status != config.SESSION_STATUS.PRICING
                 ? (<div class='input-group text-center'>
-                  <p class='w-100 mb-0 mt-1'>This input only enable when Session status is PRICING</p>
+                  <p class='w-100 mb-0 mt-1 text-danger'>This input only enable when Session status is <strong>PRICING</strong></p>
                 </div>)
                 : <></>}
             </div>
@@ -190,14 +194,20 @@ const ProductRow = ({ product, index, select, currentIndex }) => (
     <td>{product.name}</td>
     <td>{product.description} </td>
     <td>$ {product.price}</td>
-    <td>{config.SESSION_STATUS_TEXT[product.status] || 'N/A'}</td>
+    <td>
+      <span class={`badge badge-${config.sessionBadgeClasses[product.status]}`}>
+        {config.SESSION_STATUS_TEXT[product.status] || 'N/A'}
+      </span>
+    </td>
   </tr>
 );
 
 const Products = ({ match }) => (
-  { newProduct, sessions, currentProductIndex, isAdmin },
+  { newProduct, sessions, currentProductIndex, isAdmin, location },
   { inputNewProduct, createProduct, selectProduct, sessionFn }
 ) => {
+  document.title = `Products | ${config.APP_NAME}` || 'N/A';
+
   const handleSessionFn = async (params) => {
     const loading = JSAlert.loader('Please wait...');
 

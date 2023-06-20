@@ -118,7 +118,7 @@ contract Main is IMain {
     }
 
     // Set numnber of session.
-    function incrementNumberOfSession(address _account) public onlyAdmin {
+    function incrementNumberOfSession(address _account) public {
         mapParticipants[_account].numberOfSession++;
     }
 

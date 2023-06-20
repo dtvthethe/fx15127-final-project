@@ -29,6 +29,7 @@ contract Session {
     int private finalPrice;
     SESSION_STATUS private status;
     mapping(address => int) private mapParticipantPricings;
+    mapping(address => bool) private isParticipantPricingExists;
     address[] private participantPricings;
 
     using UtilityLibrary for int;
@@ -74,11 +75,25 @@ contract Session {
     }
 
     // Update session status to CLOSE.
-    function closeSession() public onlyAdmin {
-        require(status == SESSION_STATUS.PRICING, "Session status must be PRICING");
-        status = SESSION_STATUS.CLOSE;
-        emit UpdateSessionStatus("Update session status to CLOSE");
+    // function closeSession() public onlyAdmin {
+    //     require(status == SESSION_STATUS.PRICING, "Session status must be PRICING");
+    //     status = SESSION_STATUS.CLOSE;
+    //     emit UpdateSessionStatus("Update session status to CLOSE");
+    // }
+
+    function getParticipantPricings() public view returns (address[] memory) {
+        return participantPricings;
     }
+
+    // function getParticipantPricings() public view returns (address[]) {
+    //     address[] arr = [];
+
+    //     for (uint i = 0; i < participantPricings.length; i++) {
+    //         arr.push(participantPricings[i]);
+    //     }
+
+    //     return arr;
+    // }
 
     // Update session status to STOP.
     function stopSession() public onlyAdmin {
@@ -89,14 +104,13 @@ contract Session {
 
     // Participant pricing.
     function pricing(int _price) public onlyParticipant onlyInProgress {
-        mapParticipantPricings[msg.sender] = _price;
-
-        if (mapParticipantPricings[msg.sender] == 0) {
-            // check this work?
+        if (isParticipantPricingExists[msg.sender] == false) {
+            isParticipantPricingExists[msg.sender] = true;
             participantPricings.push(msg.sender);
             MainContract.incrementNumberOfSession(msg.sender);
         }
 
+        mapParticipantPricings[msg.sender] = _price;
         emit Pricing(msg.sender, "Pricing success!");
     }
 
@@ -105,8 +119,8 @@ contract Session {
         return (productName, description, images, suggestPrice, finalPrice, uint(status));
     }
 
-    // Calculate suggest price.
-    function calculateSuggestPrice() public onlyAdmin {
+    // Calculate suggest price. (Set price and Close)
+    function calculateSuggestPrice() public onlyAdmin onlyInProgress {
         int _suggestPrice = 0;
         int _sumOfPriceWithDeviation = 0;
         int _sumOfDeviation = 0;
@@ -120,6 +134,7 @@ contract Session {
 
         _suggestPrice = _sumOfPriceWithDeviation / ((100 * int(participantPricings.length)) - _sumOfDeviation);
         suggestPrice = uint(_suggestPrice);
+        status = SESSION_STATUS.CLOSE;
     }
 
     // Calculate deviation in session.
@@ -140,6 +155,12 @@ contract Session {
     // Modify only status is PRICING.
     modifier onlyInProgress {
         require(status == SESSION_STATUS.PRICING, "Session is not in progress");
+        _;
+    }
+
+    // Modify only status is CLOSE.
+    modifier onlyClose {
+        require(status == SESSION_STATUS.CLOSE, "Session is not in progress");
         _;
     }
 
