@@ -30,7 +30,6 @@ const Login = () => {
 
   return (
     <div class="login" style="height: 100vh; display: flex; justify-content: center; align-items: center;">
-
       <button onclick={() => handleBtnLoginClick()} class="btn btn-login">
         <i class="fa-solid fa-plug"></i> Login using MetaMask
       </button>

@@ -1,5 +1,5 @@
 exports.config = {
-  mainContract: '0x3CD3a5255382e336E130A6D6ec96773565eD83f1',
+  mainContract: '0x7C52Caa9994ADe02865B26eCc0f0795f94CD5d40',
   loginStoreKey: 'LOGIN_STORE_KEY',
   zeroAddress: '0x0000000000000000000000000000000000000000',
 };

@@ -72,7 +72,7 @@ const Profile = ({ profile, register, inputProfile }) => {
           <button
             class='btn  btn-sm btn-ghost-primary btn-block '
             type='button'
-            onclick={register}
+            onclick={() => register(true)}
           >
             Register
           </button>

@@ -29,13 +29,12 @@ if (typeof web3 !== 'undefined') {
   }
 
   window.ethereum.on('accountsChanged', async (error) => {
-    // logcalStorage.removeItem(config.loginStoreKey);
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
 
-    if (accounts.length === 0) {
+    if (accounts.length === 0 || (accounts.length > 0 && accounts[0] === config.zeroAddress)) {
       localStorage.removeItem(config.loginStoreKey);
+      window.location.replace('/');
     }
-    // console.log(accounts);
   });
 } else {
   // web3js = new Web3('ws://localhost:7545');
@@ -59,8 +58,16 @@ function componentMain() {
     newProduct: {},
     sessions: [],
     currentProductIndex: 0,
-    newParticipant: {},
-    frmParticipantShow: false
+    newParticipant: {
+      address: '',
+      fullname: '',
+      email: ''
+    },
+    frmParticipant: {
+      txtAddress: true,
+      txtFullname: true,
+      txtEmail: true,
+    }
   };
 
   // Functions of Main Contract
@@ -83,8 +90,8 @@ function componentMain() {
     iParticipants: index => mainContract.methods.iParticipants(index).call,
 
     // Register new participant
-    register: (fullname, email) =>
-      mainContract.methods.register(fullname, email).send,
+    register: (account, fullname, email) =>
+      mainContract.methods.register(account, fullname, email).send,
 
     // Get number of sessions  
     nSessions: mainContract.methods.nSessions().call,
@@ -208,7 +215,7 @@ function componentMain() {
           });
         } else {
           localStorage.removeItem(config.loginStoreKey);
-          location.reload();
+          window.location.replace('/');
         }
       } catch (error) {
         console.log(error);
@@ -236,7 +243,7 @@ function componentMain() {
             address: item.account,
             deviation: item.deviation || 0,
             email: item.email || '',
-            fullName: item.fullName || '',
+            fullname: item.fullName || '',
             nSession: item.numberOfSession || 0,
           }
         });
@@ -261,16 +268,26 @@ function componentMain() {
       };
     },
 
-    register: () => async (state, actions) => {
+    register: (isUpdateProfile) => async (state, actions) => {
       // TODO: Register new participant
       const currentAccount = localStorage.getItem(config.loginStoreKey);
 
       try {
         if (state.isAdmin) {
-          await contractFunctions.updateAdminProfile(
-            state.profile.fullname,
-            state.profile.email
-          )({ from: currentAccount });
+          if (isUpdateProfile) {
+            await contractFunctions.updateAdminProfile(
+              state.profile.fullname,
+              state.profile.email
+            )({ from: currentAccount });
+          } else {
+            await contractFunctions.register(
+              state.newParticipant.address,
+              state.newParticipant.fullname,
+              state.newParticipant.email
+            )({ from: currentAccount });
+            await actions.getParticipants();
+          }
+          
         } else {
           // await contractFunctions.register(
           //   state.profile.fullname,
@@ -284,15 +301,17 @@ function componentMain() {
 
       // const profile = {};
       // TODO: And get back the information of created participant
-      const profile = state.isAdmin
-        ? await contractFunctions.getAdminProfile()({ from: currentAccount })
-        : await contractFunctions.participants(currentAccount)({ from: currentAccount });
+      if (isUpdateProfile) {
+        const profile = state.isAdmin
+          ? await contractFunctions.getAdminProfile()({ from: currentAccount })
+          : await contractFunctions.participants(currentAccount)({ from: currentAccount });
 
-      actions.setProfile({
-        ...state.profile,
-        email: profile.email || '',
-        fullname: profile.fullName || ''
-      });
+        actions.setProfile({
+          ...state.profile,
+          email: profile.email || '',
+          fullname: profile.fullName || ''
+        });
+      }
     },
 
     getSessions: () => async (state, actions) => {
@@ -352,6 +371,16 @@ function componentMain() {
       return {
         ...state,
         newParticipant
+      };
+    },
+
+    setFrmParticipant: ({ fieldName, value }) => state => {
+      let frmParticipant = state.frmParticipant;
+      frmParticipant[fieldName] = !value;
+
+      return {
+        ...state,
+        frmParticipant
       };
     },
 

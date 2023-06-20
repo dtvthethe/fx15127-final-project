@@ -1,8 +1,8 @@
 import { app, h } from 'hyperapp';
 import './participants.css';
-import ModalVanilla from 'modal-vanilla';
+import { modalHide, modalShow } from './common/modal.js';
 
-const MyModal = ({ closeModal, inputNewParticipant, newParticipant, handleOnCreateParticipant }) => (
+const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipant, frmParticipant }) => (
   <div id="userModal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -20,6 +20,7 @@ const MyModal = ({ closeModal, inputNewParticipant, newParticipant, handleOnCrea
                   id='address'
                   placeholder='0x94645E...'
                   value={newParticipant.address}
+                  disabled={frmParticipant.txtAddress}
                   required
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'address', value: e.target.value });
@@ -34,6 +35,7 @@ const MyModal = ({ closeModal, inputNewParticipant, newParticipant, handleOnCrea
                   id='fullname'
                   placeholder='John Doe'
                   value={newParticipant.fullname}
+                  disabled={frmParticipant.txtFullname}
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'fullname', value: e.target.value });
                   }}
@@ -47,6 +49,7 @@ const MyModal = ({ closeModal, inputNewParticipant, newParticipant, handleOnCrea
                   id='email'
                   placeholder='example@email.com'
                   value={newParticipant.email}
+                  disabled={frmParticipant.txtEmail}
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'email', value: e.target.value });
                   }}
@@ -56,9 +59,7 @@ const MyModal = ({ closeModal, inputNewParticipant, newParticipant, handleOnCrea
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-          <button type="button" class="btn btn-secondary" onclick={closeModal}>Close</button>
+          <button type="button" class="btn btn-secondary" onclick={() => modalHide('userModal')}>Close</button>
           <button type="button" class="btn btn-success" onclick={() => handleOnCreateParticipant()}>Save</button>
         </div>
       </div>
@@ -66,7 +67,7 @@ const MyModal = ({ closeModal, inputNewParticipant, newParticipant, handleOnCrea
   </div>
 );
 
-const ParticipantRow = ({ participant, openModal }) => (
+const ParticipantRow = ({ participant, openUserEditModal }) => (
   <tr class='participant'>
     <td scope='row' class='text-center'>
       <img
@@ -90,7 +91,7 @@ const ParticipantRow = ({ participant, openModal }) => (
       <code>{participant.address}</code>
     </td>
     <td>
-      <button type="button" class="btn btn-warning" onclick={openModal}>
+      <button type="button" class="btn btn-warning" onclick={() => openUserEditModal(participant.address)}>
         <i class="fa-regular fa-pen-to-square"></i> Edit
       </button>
     </td>
@@ -98,25 +99,41 @@ const ParticipantRow = ({ participant, openModal }) => (
 );
 
 const Participants = ({ match }) => (
-  { participants, newParticipant, frmParticipantShow },
-  { inputNewParticipant, createNewParticipant }
+  { participants, newParticipant, frmParticipant },
+  { inputNewParticipant, createNewParticipant, setFrmParticipant, register }
 ) => {
-  const myModal = new ModalVanilla({
-    el: document.getElementById('userModal')
-  });
+  const openUserModal = () => {
+    frmAdd(true, false);
+    modalShow('userModal');
+    resetForm();
+  }
 
-  const openModal = () => {
-    myModal.show();
-  };
-
-  const closeModal = () => {
-    myModal.hide();
-  };
+  const openUserEditModal = (address) => {
+    frmAdd(false, true);
+    modalShow('userModal');
+    resetForm(address);
+  }
 
   const handleOnCreateParticipant = async () => {
-    await createNewParticipant();
-    document.getElementsByClassName('modal-backdrop')[0].classList.add('show');
-    closeModal();
+    if (frmParticipant.txtAddress === true) {
+      await register(false);
+    } else {
+      await createNewParticipant();
+    }
+
+    modalHide('userModal');
+  }
+
+  const resetForm = (address = '', fullname = '', email = '') => {
+    inputNewParticipant({ fieldName: 'address', value: address });
+    inputNewParticipant({ fieldName: 'fullname', value: fullname });
+    inputNewParticipant({ fieldName: 'email', value: email });
+  }
+
+  const frmAdd = (txtAddress, txtOther) => {
+    setFrmParticipant({ fieldName: 'txtAddress', value: txtAddress });
+    setFrmParticipant({ fieldName: 'txtFullname', value: txtOther });
+    setFrmParticipant({ fieldName: 'txtEmail', value: txtOther });
   }
 
   return (
@@ -126,7 +143,7 @@ const Participants = ({ match }) => (
           <thead>
             <tr>
               <th scope='col' class='text-center'>
-                <button type="button" class="btn btn-success" onclick={openModal}>
+                <button type="button" class="btn btn-success" onclick={() => openUserModal()}>
                   <i class="fa-solid fa-plus"></i> Add
                 </button>
               </th>
@@ -141,18 +158,24 @@ const Participants = ({ match }) => (
               <th scope='col' class='text-center'>
                 Address
               </th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {(participants || []).map((p, i) => {
               p.no = i + 1;
-              return ParticipantRow({ participant: p, openModal });
+              return ParticipantRow({ participant: p, openUserEditModal });
             })}
           </tbody>
         </table>
       </div>
       {/* <div class='p-2 flex product-detail'></div> */}
-      <MyModal closeModal={closeModal} inputNewParticipant={inputNewParticipant} newParticipant={newParticipant} handleOnCreateParticipant={handleOnCreateParticipant} />
+      <MyModal
+        inputNewParticipant={inputNewParticipant}
+        newParticipant={newParticipant}
+        handleOnCreateParticipant={handleOnCreateParticipant}
+        frmParticipant={frmParticipant}
+      />
     </div>
   )
 };

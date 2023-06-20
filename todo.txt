@@ -5,8 +5,3 @@
 - validate form
 - dungf core ui icon -> remove fontawsom di
 - update maxNumberOfParticipants to 10
-
-
-  {
-        frmParticipantShow && <FrmParticipant inputNewParticipant={inputNewParticipant} newParticipant={newParticipant} createNewParticipant={createNewParticipant} />
-      }
