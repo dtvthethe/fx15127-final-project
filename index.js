@@ -25,8 +25,9 @@ let web3js;
 
 if (typeof web3 !== 'undefined') {
   web3js = new Web3(web3.currentProvider);
+  const localKey = localStorage.getItem(config.loginStoreKey);
 
-  if (localStorage.getItem(config.loginStoreKey)) {
+  if (localKey && localKey != undefined && localKey != 'undefined' && localKey != config.zeroAddress) {
     componentMain();
   } else {
     componentLogin();

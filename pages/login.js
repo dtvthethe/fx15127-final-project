@@ -6,6 +6,12 @@ import { config } from "../config";
 const Login = () => {
   const handleBtnLoginClick = () => {
     if (typeof web3 !== "undefined") {
+      const localKey = localStorage.getItem(config.loginStoreKey);
+
+      if (localKey == undefined || localKey == 'undefined' || localKey != config.zeroAddress) {
+        localStorage.removeItem(config.loginStoreKey);
+      }
+
       if (localStorage.getItem(config.loginStoreKey)) {
         location.reload();
       } else {
