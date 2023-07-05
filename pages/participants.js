@@ -1,8 +1,7 @@
 import { app, h } from 'hyperapp';
 import './participants.css';
 import JSAlert from 'js-alert';
-import Toastify from 'toastify-js'
-import "toastify-js/src/toastify.css"
+import Toastify from 'toastify-js';
 import { modalHide, modalShow } from './common/modal.js';
 import { config } from '../config';
 
@@ -25,7 +24,7 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   placeholder='0x94645E...'
                   value={newParticipant.address}
                   disabled={frmParticipant.txtAddress}
-                  required
+                  maxlength="50"
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'address', value: e.target.value });
                   }}
@@ -40,6 +39,7 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   placeholder='John Doe'
                   value={newParticipant.fullname}
                   disabled={frmParticipant.txtFullname}
+                  maxlength="120"
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'fullname', value: e.target.value });
                   }}
@@ -54,6 +54,7 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   placeholder='example@email.com'
                   value={newParticipant.email}
                   disabled={frmParticipant.txtEmail}
+                  maxlength="120"
                   oninput={e => {
                     inputNewParticipant({ fieldName: 'email', value: e.target.value });
                   }}
@@ -89,7 +90,7 @@ const ParticipantRow = ({ participant, openUserEditModal }) => (
       {participant.nSessions || 0}
     </td>
     <td scope='row' class='align-middle text-center'>
-      {participant.deviation / 100} %
+      {participant.deviation} %
     </td>
     <td scope='row' class='align-middle text-center'>
       <code>{participant.address}</code>
@@ -106,6 +107,8 @@ const Participants = ({ match }) => (
   { participants, newParticipant, frmParticipant },
   { inputNewParticipant, createNewParticipant, setFrmParticipant, register }
 ) => {
+  document.title = `Participants | ${config.APP_NAME}` || 'N/A';
+
   const openUserModal = () => {
     frmAdd(true, false);
     modalShow('userModal');
@@ -134,7 +137,6 @@ const Participants = ({ match }) => (
 
   const handleOnCreateParticipant = async () => {
     modalHide('userModal');
-    const loading = JSAlert.loader('Please wait...');
 
     try {
       if (frmParticipant.txtAddress === true) {
@@ -142,21 +144,7 @@ const Participants = ({ match }) => (
       } else {
         await createNewParticipant();
       }
-    
-      loading.dismiss();
-      Toastify({
-        text: 'Participant saved!',
-        position: 'center',
-        backgroundColor: config.color.success
-      }).showToast();
     } catch (error) {
-      console.log(error);
-      loading.dismiss();
-      Toastify({
-        text: 'Error on handle save participant!',
-        position: 'center',
-        backgroundColor: config.color.error
-      }).showToast();
     }
   }
 
@@ -179,7 +167,7 @@ const Participants = ({ match }) => (
           <thead>
             <tr>
               <th scope='col' class='text-center'>
-                <button type="button" class="btn btn-success" onclick={() => openUserModal()}>
+                <button type="button" class="btn btn-success" onclick={() => openUserModal()} disabled={participants == undefined || participants.length >= config.MAX_OF_PARTICIPANTS ? 'disabled' : ''}>
                   <i class="fa-solid fa-plus"></i> Add
                 </button>
               </th>

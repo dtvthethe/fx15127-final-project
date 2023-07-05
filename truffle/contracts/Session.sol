@@ -20,7 +20,7 @@ contract Session {
     IMain MainContract;
 
     // TODO: Variables
-    enum SESSION_STATUS {CREATED, INPROGRESS, CLOSE}
+    enum SESSION_STATUS {CREATED, PRICING, CLOSE, STOP}
 
     string private productName;
     string private description;
@@ -29,7 +29,9 @@ contract Session {
     int private finalPrice;
     SESSION_STATUS private status;
     mapping(address => int) private mapParticipantPricings;
+    mapping(address => bool) private isParticipantPricingExists;
     address[] private participantPricings;
+    address private adminAddr;
 
     using UtilityLibrary for int;
 
@@ -50,6 +52,7 @@ contract Session {
         suggestPrice = 0;
         finalPrice = 0;
         status = SESSION_STATUS.CREATED;
+        adminAddr = MainContract.getAdmin();
 
         // Call Main Contract function to link current contract.
         MainContract.addSession(address(this));
@@ -65,30 +68,35 @@ contract Session {
     }
 
     // TODO: Functions
-    // Set status to INPROGRESS.
+    // ..CREATED.. -> PRICING -> CLOSE -> STOP
+    // Update session status to PRICING.
     function startSession() public onlyAdmin {
-        status = SESSION_STATUS.INPROGRESS;
-
-        emit StartSession("Start session success!");
+        require(status == SESSION_STATUS.CREATED, "Session status must be CREATED");
+        status = SESSION_STATUS.PRICING;
+        emit UpdateSessionStatus("Update session status to PRICING");
     }
 
-    // Set status to CLOSE.
-    function closeSession() public onlyAdmin {
-        status = SESSION_STATUS.CLOSE;
-        emit CloseSession("Close session success!");
+    // Get participant pricings.
+    function getParticipantPricings() public view returns (address[] memory) {
+        return participantPricings;
+    }
+
+    // Update session status to STOP.
+    function stopSession() public onlyAdmin {
+        require(status == SESSION_STATUS.CLOSE, "Session status must be CLOSE");
+        status = SESSION_STATUS.STOP;
+        emit UpdateSessionStatus("Update session status to STOP");
     }
 
     // Participant pricing.
-    function pricing(address _account, int _price) public onlyParticipant onlyInProgress {
-        mapParticipantPricings[_account] = _price;
-
-        if (mapParticipantPricings[_account] == 0) {
-            // check this work?
-            participantPricings.push(_account);
-            MainContract.incrementNumberOfSession(_account);
+    function pricing(int _price) public onlyParticipant onlyInProgress {
+        if (isParticipantPricingExists[msg.sender] == false) {
+            isParticipantPricingExists[msg.sender] = true;
+            participantPricings.push(msg.sender);
         }
 
-        emit Pricing(_account, "Pricing success!");
+        mapParticipantPricings[msg.sender] = _price;
+        emit Pricing(msg.sender, "Pricing success!");
     }
 
     // Get session detail.
@@ -96,14 +104,13 @@ contract Session {
         return (productName, description, images, suggestPrice, finalPrice, uint(status));
     }
 
-    // Calculate suggest price.
-    function calculateSuggestPrice() public onlyAdmin {
+    // Calculate suggest price and set status to Close.
+    function calculateSuggestPriceAndCloseSession(int _price) public onlyAdmin onlyInProgress {
         int _suggestPrice = 0;
         int _sumOfPriceWithDeviation = 0;
         int _sumOfDeviation = 0;
 
         for (uint i = 0; i < participantPricings.length; i++) {
-            // TODO: ko co thi return 0
             int _deviation = MainContract.getDeviation(participantPricings[i]);
             _sumOfPriceWithDeviation += mapParticipantPricings[participantPricings[i]] * (100 - _deviation);
             _sumOfDeviation += _deviation;
@@ -111,39 +118,55 @@ contract Session {
 
         _suggestPrice = _sumOfPriceWithDeviation / ((100 * int(participantPricings.length)) - _sumOfDeviation);
         suggestPrice = uint(_suggestPrice);
+        finalPrice = _price;
+        status = SESSION_STATUS.CLOSE;
     }
 
     // Calculate deviation in session.
-    function calculateDeviationInSession(address _account) public view onlyAdmin onlyFinalPriceMustSetValue returns (int) {
+    function calculateDeviationInSession(address _account) private view returns (int) {
         int _subDeviation = (finalPrice - mapParticipantPricings[_account]).abs();
+        int _subDeviationResult = ((_subDeviation * 10**18) / finalPrice) * 100;
 
-        return (_subDeviation / finalPrice) * 100;
+        return _subDeviationResult / 10**18;
     }
 
     // Calculate deviation.
-    function calculateDeviationLatest(address _account) public onlyAdmin onlyFinalPriceMustSetValue {
-        int _deviation = MainContract.getDeviation(_account);
-        int _subDeviation = (_deviation * MainContract.getNumberOfSession(_account)) + calculateDeviationInSession(_account);
-        int _newDeviation = _subDeviation / (_deviation + 1);
-        MainContract.setDeviation(_account, _newDeviation);
+    function calculateDeviationLatestAndStop() public onlyAdmin onlyFinalPriceMustSetValue {
+        for (uint i = 0; i < participantPricings.length; i++) {
+            address _account = participantPricings[i];
+            int _deviation = MainContract.getDeviation(_account);
+            int _numberOfSession = MainContract.getNumberOfSession(_account);
+            int _subDeviation = (_deviation * _numberOfSession) + calculateDeviationInSession(_account);
+            int _newDeviation = _subDeviation / (_numberOfSession + 1);
+            MainContract.setDeviation(_account, _newDeviation);
+            MainContract.incrementNumberOfSession(_account);
+        }
+
+        status = SESSION_STATUS.STOP;
     }
 
-    // Modify only status is INPROGRESS.
+    // Modify only status is PRICING.
     modifier onlyInProgress {
-        require(status == SESSION_STATUS.INPROGRESS, "Session is not in progress");
+        require(status == SESSION_STATUS.PRICING, "Session is not in progress");
+        _;
+    }
+
+    // Modify only status is CLOSE.
+    modifier onlyClose {
+        require(status == SESSION_STATUS.CLOSE, "Session is not in progress");
         _;
     }
 
     // Modify to check only admin.
     modifier onlyAdmin() {
-        require(msg.sender == MainContract.getAdmin(), "This function only admin can execute!");
+        require(msg.sender == adminAddr, "This function only admin can execute!");
         _;
     }
 
     // Modify to check only participant.
     modifier onlyParticipant() {
         // TODO: viet lai modifier nay
-        require(msg.sender != MainContract.getAdmin(), "This function only participant can execute!");
+        require(msg.sender != adminAddr, "This function only participant can execute!");
         _;
     }
 
@@ -159,11 +182,8 @@ contract Session {
     // Event update session.
     event UpdateSession(string _productName, string _description, string _msg);
 
-    // Event start session.
-    event StartSession(string _msg);
-
-    // Event close session.
-    event CloseSession(string _msg);
+    // Event update session status.
+    event UpdateSessionStatus(string _msg);
 
     // Event pricing.
     event Pricing(address _account, string _msg);

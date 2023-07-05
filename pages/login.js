@@ -6,6 +6,12 @@ import { config } from "../config";
 const Login = () => {
   const handleBtnLoginClick = () => {
     if (typeof web3 !== "undefined") {
+      const localKey = localStorage.getItem(config.loginStoreKey);
+
+      if (localKey == undefined || localKey == 'undefined' || localKey != config.zeroAddress) {
+        localStorage.removeItem(config.loginStoreKey);
+      }
+
       if (localStorage.getItem(config.loginStoreKey)) {
         location.reload();
       } else {
@@ -30,10 +36,14 @@ const Login = () => {
   };
 
   return (
-    <div class="login" style="height: 100vh; display: flex; justify-content: center; align-items: center;">
-      <button onclick={() => handleBtnLoginClick()} class="btn btn-login">
-        <i class="fa-solid fa-plug"></i> Login using MetaMask
-      </button>
+    <div class='d-flex w-100 h-100'>
+      <div class='bg-white border-right products-list'>
+        <div class="login" style="height: 100vh; display: flex; justify-content: center; align-items: center;">
+          <button onclick={() => handleBtnLoginClick()} class="btn btn-login">
+            <i class="fa-solid fa-plug"></i> Login using MetaMask
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

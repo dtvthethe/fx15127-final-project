@@ -13,6 +13,10 @@ import Session from './contracts/Session.json';
 import { InstallMetaMask } from './pages/installMetaMask';
 import { Login } from './pages/login';
 import JSAlert from 'js-alert';
+import Toastify from 'toastify-js'
+import "toastify-js/src/toastify.css"
+import { Home } from './pages/home';
+import { log } from 'console';
 
 const Fragment = (props, children) => children;
 
@@ -21,8 +25,9 @@ let web3js;
 
 if (typeof web3 !== 'undefined') {
   web3js = new Web3(web3.currentProvider);
+  const localKey = localStorage.getItem(config.loginStoreKey);
 
-  if (localStorage.getItem(config.loginStoreKey)) {
+  if (localKey && localKey != undefined && localKey != 'undefined' && localKey != config.zeroAddress) {
     componentMain();
   } else {
     componentLogin();
@@ -72,7 +77,8 @@ function componentMain() {
       txtAddress: true,
       txtFullname: true,
       txtEmail: true,
-    }
+    },
+    titlePage: '...'
   };
 
   // Functions of Main Contract
@@ -115,6 +121,15 @@ function componentMain() {
 
     // Add participant
     addParticipant: (address) => mainContract.methods.addParticipant(address).send,
+
+    // Creat new session
+    createSession: (productName, description, images) => mainContract.methods.createSession(productName, description, images).send,
+
+    // Get session address
+    getAllSessionAddresses: () => mainContract.methods.getAllSessionAddresses().call,
+
+    // Get session detail
+    getSessionDetail: (address) => mainContract.methods.getSessionDetail(address).call,
   };
 
   const actions = {
@@ -129,7 +144,7 @@ function componentMain() {
 
     inputNewProduct: ({ field, value }) => state => {
       let newProduct = state.newProduct || {};
-      newProduct[field] = value;
+      newProduct[field] = field === 'image' ? [value] : value;
       return {
         ...state,
         newProduct
@@ -137,20 +152,26 @@ function componentMain() {
     },
 
     createProduct: () => async (state, actions) => {
-      let contract = new web3js.eth.Contract(Session.abi, {
-        data: Session.bytecode
-      });
-      await contract
-        .deploy({
-          arguments: [
-            // TODO: Argurment when Deploy the Session Contract
-            // It must be matched with Session.sol Contract Constructor
-            // Hint: You can get data from `state`
-          ]
-        })
-        .send({ from: state.account });
+      // let contract = new web3js.eth.Contract(Session.abi, {
+      //   data: Session.bytecode
+      // });
+      // await contract
+      //   .deploy({
+      //     arguments: [
+      //       // TODO: Argurment when Deploy the Session Contract
+      //       // It must be matched with Session.sol Contract Constructor
+      //       // Hint: You can get data from `state`
+      //     ]
+      //   })
+      //   .send({ from: state.account });
 
-      actions.getSessions();
+      // actions.getSessions();
+
+      // my code
+
+      // console.log(state.newProduct);
+      await contractFunctions.createSession(state.newProduct.name, state.newProduct.description, state.newProduct.image)({ from: state.account });
+      await actions.getSessions();
     },
 
     selectProduct: i => state => {
@@ -159,26 +180,40 @@ function componentMain() {
       };
     },
 
-    sessionFn: (action, data) => (state, { }) => {
-      switch (action) {
+    sessionFn: (action) => async (state, actions) => {
+      const session = state.sessions[action.payload.index];
+
+      if (session == undefined || session == null || session.length == 0) {
+        return;
+      }
+
+      const contract = session.contract;
+
+      switch (action.type) {
         case 'start':
           //TODO: Handle event when User Start a new session
+          await contract.methods.startSession().send({ from: state.account });
+
           break;
         case 'stop':
           //TODO: Handle event when User Stop a session
+          await contract.methods.calculateDeviationLatestAndStop().send({ from: state.account });
+          await actions.getParticipants();
 
           break;
         case 'pricing':
           //TODO: Handle event when User Pricing a product
           //The inputed Price is stored in `data`
+          await contract.methods.pricing(action.payload.price).send({ from: state.account });
 
           break;
         case 'close':
           //TODO: Handle event when User Close a session
           //The inputed Price is stored in `data`
-
-          break;
+          await contract.methods.calculateSuggestPriceAndCloseSession(action.payload.price).send({ from: state.account });
       }
+
+      await actions.getSessions();
     },
 
     location: location.actions,
@@ -257,7 +292,7 @@ function componentMain() {
             deviation: item.deviation || 0,
             email: item.email || '',
             fullname: item.fullName || '',
-            nSession: item.numberOfSession || 0,
+            nSessions: item.numberOfSession || 0
           }
         });
       } catch (error) {
@@ -283,6 +318,7 @@ function componentMain() {
 
     register: (isUpdateProfile) => async (state, actions) => {
       // TODO: Register new participant
+      const loading = JSAlert.loader('Please wait...');
       const currentAccount = localStorage.getItem(config.loginStoreKey);
 
       try {
@@ -298,6 +334,7 @@ function componentMain() {
               state.newParticipant.fullname,
               state.newParticipant.email
             )({ from: currentAccount });
+            await actions.fetchBalance();
             await actions.getParticipants();
           }
         } else {
@@ -309,16 +346,26 @@ function componentMain() {
             )({ from: currentAccount });
           }
         }
+
+        Toastify({
+          text: 'Profile saved, Fetching balance...',
+          position: 'center',
+          backgroundColor: config.color.success
+        }).showToast();
       } catch (error) {
+        Toastify({
+          text: 'Error profile update',
+          position: 'center',
+          backgroundColor: config.color.error
+        }).showToast();
         console.log(error);
       }
 
-      // const profile = {};
-      // TODO: And get back the information of created participant
       if (isUpdateProfile) {
         const profile = state.isAdmin
           ? await contractFunctions.getAdminProfile()({ from: currentAccount })
           : await contractFunctions.participants(currentAccount)({ from: currentAccount });
+        await actions.fetchBalance();
 
         actions.setProfile({
           ...state.profile,
@@ -326,18 +373,23 @@ function componentMain() {
           fullname: profile.fullName || ''
         });
       }
+
+      loading.dismiss();
     },
 
     getSessions: () => async (state, actions) => {
       // TODO: Get the number of Sessions stored in Main contract
-      let nSession = await contractFunctions.nSessions();
-      let sessions = [];
+      // let nSession = await contractFunctions.nSessions();
+      // let sessions = [];
 
       // TODO: And loop through all sessions to get information
+      const results = await contractFunctions.getAllSessionAddresses()({ from: state.account });
+      const nSession = results.length;
+      let sessions = [];
 
       for (let index = 0; index < nSession; index++) {
         // Get session address
-        let session = await contractFunctions.sessions(index)();
+        let session = results[index];
         // Load the session contract on network
         let contract = new web3js.eth.Contract(Session.abi, session);
 
@@ -346,14 +398,28 @@ function componentMain() {
         // TODO: Load information of session.
         // Hint: - Call methods of Session contract to reveal all nessesary information
         //       - Use `await` to wait the response of contract
+        const sessionDetail = await contract.methods.getSessionDetail().call({ from: state.account });
 
-        let name = ''; // TODO
-        let description = ''; // TODO
-        let price = 0; // TODO
-        let image = ''; // TODO
+        let name = sessionDetail[0] || ''; // TODO
+        let description = sessionDetail[1] || ''; // TODO
+        let price = sessionDetail[3] || 0; // TODO
+        let image = sessionDetail[2].length > 0 ? sessionDetail[2][0] : ''; // TODO
+        let status = sessionDetail[5] || '-'; // TODO
+        let finalPrice = sessionDetail[4] || 0; // TODO
+        let priceFormat = 0;
+        let finalPriceFormat = 0;
 
-        sessions.push({ id, name, description, price, contract, image });
+        if (price > 0) {
+          priceFormat = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        if (finalPrice > 0) {
+          finalPriceFormat = finalPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        sessions.push({ id, name, description, price, finalPrice, contract, image, status, priceFormat, finalPriceFormat });
       }
+
       actions.setSessions(sessions);
     },
 
@@ -399,11 +465,26 @@ function componentMain() {
     },
 
     createNewParticipant: () => async (state, actions) => {
+      const loading = JSAlert.loader('Please wait...');
+
       try {
         await contractFunctions.addParticipant(state.newParticipant.address)({ from: state.account });
+        await actions.fetchBalance();
         await actions.getParticipants();
+        loading.dismiss();
+        Toastify({
+          text: 'Participant saved!',
+          position: 'center',
+          backgroundColor: config.color.success
+        }).showToast();
       } catch (error) {
         console.log(error);
+        loading.dismiss();
+        Toastify({
+          text: 'Error on handle save participant!',
+          position: 'center',
+          backgroundColor: config.color.error
+        }).showToast();
       }
     },
 
@@ -415,12 +496,17 @@ function componentMain() {
       }
     },
 
+    fetchBalance: () => async (state, actions) => {
+      let balance = await contractFunctions.getBalance(state.account);
+      state.balance = balance;
+    },
+
     fetchData: () => async (state, actions) => {
       await actions.getAccount();
       await actions.checkPermission();
       await actions.getParticipants();
       await actions.getSessions();
-    }
+    },
   };
 
   const view = (
@@ -451,6 +537,7 @@ function componentMain() {
             <div class='h-100  w-100'>
               <Route path='/products' render={Products}></Route>
               <Route path='/participants' render={Participants}></Route>
+              <Route path='/' render={Home}></Route>
             </div>
           </main>
         </div>
@@ -458,6 +545,7 @@ function componentMain() {
     );
   };
 
+  document.title = `Home | ${config.APP_NAME}` || 'N/A';
   const el = document.body;
   const main = app(state, actions, view, el);
   const unsubscribe = location.subscribe(main.location);
@@ -471,6 +559,8 @@ function componentInstalWallet() {
       <InstallMetaMask />
     </body>
   );
+
+  document.title = `Install MetaMask | ${config.APP_NAME}` || 'N/A';
   app(state, actions, view, document.body)
 };
 
@@ -482,5 +572,7 @@ function componentLogin() {
       <Login />
     </body>
   );
+
+  document.title = `Login | ${config.APP_NAME}` || 'N/A';
   app(state, actions, view, document.body)
 };

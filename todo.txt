@@ -1,7 +1,11 @@
-- create url login
-- downgrade vertion web3
-- gom admin par lai la 1?
-- moix component thi nen co 1 file css
 - validate form
-- dungf core ui icon -> remove fontawsom di
-- update maxNumberOfParticipants to 10
+- register nhap thong tin name, email cung chan show Toat de biet la update thonf tin thanh cong
+- them popup confirm khi: start, close
+- numberOfSession: đọc lại spec, số lượng này chỉ đc tăng khi ng admin chốt giá p ko?
+
+https://upload.wikimedia.org/wikipedia/en/b/bd/Doraemon_character.png
+
+
+
+
+
