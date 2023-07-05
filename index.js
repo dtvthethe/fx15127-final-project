@@ -198,11 +198,7 @@ function componentMain() {
         case 'stop':
           //TODO: Handle event when User Stop a session
           await contract.methods.calculateDeviationLatestAndStop().send({ from: state.account });
-
-          break;
-        case 'stop2':
-          const aa = await contract.methods.abc(action.payload.price).call({ from: state.account });
-          console.log(aa);
+          await actions.getParticipants();
 
           break;
         case 'pricing':
@@ -291,7 +287,6 @@ function componentMain() {
       try {
         const results = await contractFunctions.getAllParticipants()({ from: state.account });
         participants = results.map(item => {
-          console.log(item);
           return {
             address: item.account,
             deviation: item.deviation || 0,
@@ -383,36 +378,11 @@ function componentMain() {
     },
 
     getSessions: () => async (state, actions) => {
-      // // TODO: Get the number of Sessions stored in Main contract
+      // TODO: Get the number of Sessions stored in Main contract
       // let nSession = await contractFunctions.nSessions();
       // let sessions = [];
 
-      // // TODO: And loop through all sessions to get information
-
-      // for (let index = 0; index < nSession; index++) {
-      //   // Get session address
-      //   let session = await contractFunctions.sessions(index)();
-      //   console.log(session);
-      //   // Load the session contract on network
-      //   let contract = new web3js.eth.Contract(Session.abi, session);
-
-      //   let id = session;
-
-      //   // TODO: Load information of session.
-      //   // Hint: - Call methods of Session contract to reveal all nessesary information
-      //   //       - Use `await` to wait the response of contract
-
-      //   let name = ''; // TODO
-      //   let description = ''; // TODO
-      //   let price = 0; // TODO
-      //   let image = ''; // TODO
-
-      //   sessions.push({ id, name, description, price, contract, image });
-      // }
-      // actions.setSessions(sessions);
-
-      // my code
-
+      // TODO: And loop through all sessions to get information
       const results = await contractFunctions.getAllSessionAddresses()({ from: state.account });
       const nSession = results.length;
       let sessions = [];

@@ -1,15 +1,14 @@
-const Web3 = require('web3');
 const Main = artifacts.require("Main");
 const Session = artifacts.require("Session");
-const configs = require('../../config');
+const { config } = require('../../config');
 
 contract("Main", (accounts) => {
     let instance;
     const MAX_OF_PARTICIPANTS = 4;
 
-    before(async () => {
-        instance = await Main.new(MAX_OF_PARTICIPANTS);
-    });
+    // before(async () => {
+    //     instance = await Main.new(MAX_OF_PARTICIPANTS);
+    // });
 
     // describe("Contract", () => {
     //     it("should deployed", () => {
@@ -81,7 +80,7 @@ contract("Main", (accounts) => {
             assert.equal(getSessionDetail[2], 'a.png', 'Get detail session.image failed');
             assert.equal(getSessionDetail[3].toNumber(), 0, 'Get detail session.suggestPrice failed');
             assert.equal(getSessionDetail[4].toNumber(), 0, 'Get detail session.finalPrice failed');
-            assert.equal(getSessionDetail[5].toNumber(), configs.config.SESSION_STATUS.PRICING, 'Get detail session.status failed');
+            assert.equal(getSessionDetail[5].toNumber(), config.SESSION_STATUS.PRICING, 'Get detail session.status failed');
         });
 
         it('Test pricing session A', async () => {
@@ -103,7 +102,7 @@ contract("Main", (accounts) => {
             assert.equal(getSessionDetail[2], 'a.png', 'Get detail session.image failed');
             assert.equal(getSessionDetail[3].toNumber(), 11750, 'Get detail session.suggestPrice failed');
             assert.equal(getSessionDetail[4].toNumber(), 11000, 'Get detail session.finalPrice failed');
-            assert.equal(getSessionDetail[5].toNumber(), configs.config.SESSION_STATUS.CLOSE, 'Get detail session.status failed');
+            assert.equal(getSessionDetail[5].toNumber(), config.SESSION_STATUS.CLOSE, 'Get detail session.status failed');
         });
 
         it('Test calculate deviation each participant by session A', async () => {
@@ -141,7 +140,7 @@ contract("Main", (accounts) => {
             assert.equal(getSessionDetail[2], 'b.png', 'Get detail session.image failed');
             assert.equal(getSessionDetail[3].toNumber(), 21000, 'Get detail session.suggestPrice failed');
             assert.equal(getSessionDetail[4].toNumber(), 23000, 'Get detail session.finalPrice failed');
-            assert.equal(getSessionDetail[5].toNumber(), configs.config.SESSION_STATUS.CLOSE, 'Get detail session.status failed');
+            assert.equal(getSessionDetail[5].toNumber(), config.SESSION_STATUS.CLOSE, 'Get detail session.status failed');
         });
 
         it('Test calculate deviation each participant by session B', async () => {
@@ -164,12 +163,6 @@ contract("Main", (accounts) => {
             assert.equal(participantD.deviation, 9, 'Get detail participantD.deviation failed');
         });
 
-
-
-
-
-
-
         it('Test pricing session C', async () => {
             const parAPricingSessionC = await SessionInstance3.pricing(15000, {from: participantAAddr});
             assert.notEqual(parAPricingSessionC, undefined, 'Pricing session A failed.');
@@ -185,9 +178,9 @@ contract("Main", (accounts) => {
             assert.equal(getSessionDetail[0], 'session C', 'Get detail session.name failed');
             assert.equal(getSessionDetail[1], 'session C description', 'Get detail session.description failed');
             assert.equal(getSessionDetail[2], 'c.png', 'Get detail session.image failed');
-            assert.equal(getSessionDetail[3].toNumber(), 14686, 'Get detail session.suggestPrice failed');
+            assert.equal(getSessionDetail[3].toNumber(), 14689, 'Get detail session.suggestPrice failed');
             assert.equal(getSessionDetail[4].toNumber(), 15000, 'Get detail session.finalPrice failed');
-            assert.equal(getSessionDetail[5].toNumber(), configs.config.SESSION_STATUS.CLOSE, 'Get detail session.status failed');
+            assert.equal(getSessionDetail[5].toNumber(), config.SESSION_STATUS.CLOSE, 'Get detail session.status failed');
         });
 
         it('Test calculate deviation each participant by session C', async () => {
@@ -208,6 +201,49 @@ contract("Main", (accounts) => {
             const participantD = await MainInstance.iParticipants(3);
             assert.equal(participantD.numberOfSession, 2, 'Get detail participantD.numberOfSession failed');
             assert.equal(participantD.deviation, 14, 'Get detail participantD.deviation failed');
+        });
+
+        it('Test pricing session D', async () => {
+            const parAPricingSessionD = await SessionInstance4.pricing(56000, {from: participantAAddr});
+            assert.notEqual(parAPricingSessionD, undefined, 'Pricing session A failed.');
+            const parBPricingSessionD = await SessionInstance4.pricing(40000, {from: participantBAddr});
+            assert.notEqual(parBPricingSessionD, undefined, 'Pricing session B failed.');
+            const parCPricingSessionD = await SessionInstance4.pricing(42000, {from: participantCAddr});
+            assert.notEqual(parCPricingSessionD, undefined, 'Pricing session C failed.');
+            const parDPricingSessionD = await SessionInstance4.pricing(41000, {from: participantDAddr});
+            assert.notEqual(parDPricingSessionD, undefined, 'Pricing session D failed.');
+      
+        });
+
+        it('Test calculate suggest price session D', async () => {
+            await SessionInstance4.calculateSuggestPriceAndCloseSession(45000);
+            const getSessionDetail = await SessionInstance4.getSessionDetail();
+            assert.equal(getSessionDetail[0], 'session D', 'Get detail session.name failed');
+            assert.equal(getSessionDetail[1], 'session D description', 'Get detail session.description failed');
+            assert.equal(getSessionDetail[2], 'd.png', 'Get detail session.image failed');
+            assert.equal(getSessionDetail[3].toNumber(), 45080, 'Get detail session.suggestPrice failed');
+            assert.equal(getSessionDetail[4].toNumber(), 45000, 'Get detail session.finalPrice failed');
+            assert.equal(getSessionDetail[5].toNumber(), config.SESSION_STATUS.CLOSE, 'Get detail session.status failed');
+        });
+
+        it('Test calculate deviation each participant by session D', async () => {
+            await SessionInstance4.calculateDeviationLatestAndStop();
+
+            const participantA = await MainInstance.iParticipants(0);
+            assert.equal(participantA.numberOfSession, 4, 'Get detail participantA.numberOfSession failed');
+            assert.equal(participantA.deviation, 11, 'Get detail participantA.deviation failed');
+
+            const participantB = await MainInstance.iParticipants(1);
+            assert.equal(participantB.numberOfSession, 4, 'Get detail participantB.numberOfSession failed');
+            assert.equal(participantB.deviation, 8, 'Get detail participantB.deviation failed');
+
+            const participantC = await MainInstance.iParticipants(2);
+            assert.equal(participantC.numberOfSession, 2, 'Get detail participantC.numberOfSession failed');
+            assert.equal(participantC.deviation, 21, 'Get detail participantC.deviation failed');
+
+            const participantD = await MainInstance.iParticipants(3);
+            assert.equal(participantD.numberOfSession, 3, 'Get detail participantD.numberOfSession failed');
+            assert.equal(participantD.deviation, 12, 'Get detail participantD.deviation failed');
         });
     });
 });

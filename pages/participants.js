@@ -90,7 +90,7 @@ const ParticipantRow = ({ participant, openUserEditModal }) => (
       {participant.nSessions || 0}
     </td>
     <td scope='row' class='align-middle text-center'>
-      {participant.deviation / 100} %
+      {participant.deviation} %
     </td>
     <td scope='row' class='align-middle text-center'>
       <code>{participant.address}</code>
@@ -167,7 +167,7 @@ const Participants = ({ match }) => (
           <thead>
             <tr>
               <th scope='col' class='text-center'>
-                <button type="button" class="btn btn-success" onclick={() => openUserModal()}>
+                <button type="button" class="btn btn-success" onclick={() => openUserModal()} disabled={participants == undefined || participants.length >= config.MAX_OF_PARTICIPANTS ? 'disabled' : ''}>
                   <i class="fa-solid fa-plus"></i> Add
                 </button>
               </th>

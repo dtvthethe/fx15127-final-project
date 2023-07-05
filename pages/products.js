@@ -75,13 +75,6 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                   >
                     Stop
                   </button>
-                  <button
-                    class='btn btn-outline-primary'
-                    type='button'
-                    onclick={e => fn({ type: 'stop2', payload: {index: currentProductIndex, price}})}
-                  >
-                    Stop 2
-                  </button>
                 </div>
                 <input
                   type='number'
