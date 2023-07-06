@@ -168,6 +168,7 @@ function componentMain() {
 
       // actions.getSessions();
       await contractFunctions.createSession(state.newProduct.name, state.newProduct.description, state.newProduct.image)({ from: state.account });
+      state.newProduct = {};
       await actions.getSessions();
     },
 
@@ -194,7 +195,7 @@ function componentMain() {
           break;
         case 'stop':
           //TODO: Handle event when User Stop a session
-          await contract.methods.calculateDeviationLatestAndStop().send({ from: state.account });
+          await contract.methods.stopSession(action.payload.price).send({ from: state.account });
           await actions.getParticipants();
 
           break;
@@ -203,11 +204,10 @@ function componentMain() {
           //The inputed Price is stored in `data`
           await contract.methods.pricing(action.payload.price).send({ from: state.account });
 
-          break;
-        case 'close':
-          //TODO: Handle event when User Close a session
-          //The inputed Price is stored in `data`
-          await contract.methods.calculateSuggestPriceAndCloseSession(action.payload.price).send({ from: state.account });
+        //   break;
+        // case 'close':
+        //   //TODO: Handle event when User Close a session
+        //   //The inputed Price is stored in `data`
       }
 
       await actions.getSessions();

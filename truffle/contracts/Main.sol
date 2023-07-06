@@ -113,7 +113,7 @@ contract Main is IMain {
     }
 
     // Set deviation.
-    function setDeviation(address _account, int _deviation) public {
+    function setDeviation(address _session, address _account, int _deviation) public onlySessionContract(_session, _account) {
         mapParticipants[_account].deviation = _deviation;
     }
 
@@ -153,6 +153,13 @@ contract Main is IMain {
     // Modify number of participant in ragne.
     modifier onlyInNumberOfRangeParticipant() {
         require(participantItems.length < maxOfUser, "Only create 10 users!");
+        _;
+    }
+
+    // Only session contract
+    modifier onlySessionContract(address _session, address _participant) {
+        Session session = Session(_session);
+        require(session.getParticipantPricingExists(_participant) == true, "Only session contract!");
         _;
     }
 

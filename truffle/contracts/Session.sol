@@ -8,7 +8,7 @@ interface IMain {
     function addSession(address session) external;
     function getAdmin() external view returns (address);
     function getDeviation(address _account) external view returns (int);
-    function setDeviation(address _account, int _deviation) external;
+    function setDeviation(address _session, address _account, int _deviation) external;
     function incrementNumberOfSession(address _account) external;
     function getNumberOfSession(address _account) external view returns(int);
 }
@@ -20,7 +20,7 @@ contract Session {
     IMain MainContract;
 
     // TODO: Variables
-    enum SESSION_STATUS {CREATED, PRICING, CLOSE, STOP}
+    enum SESSION_STATUS {CREATED, PRICING, STOP}
 
     string private productName;
     string private description;
@@ -68,7 +68,7 @@ contract Session {
     }
 
     // TODO: Functions
-    // ..CREATED.. -> PRICING -> CLOSE -> STOP
+    // ..CREATED.. -> PRICING -> STOP
     // Update session status to PRICING.
     function startSession() public onlyAdmin {
         require(status == SESSION_STATUS.CREATED, "Session status must be CREATED");
@@ -79,13 +79,6 @@ contract Session {
     // Get participant pricings.
     function getParticipantPricings() public view returns (address[] memory) {
         return participantPricings;
-    }
-
-    // Update session status to STOP.
-    function stopSession() public onlyAdmin {
-        require(status == SESSION_STATUS.CLOSE, "Session status must be CLOSE");
-        status = SESSION_STATUS.STOP;
-        emit UpdateSessionStatus("Update session status to STOP");
     }
 
     // Participant pricing.
@@ -104,8 +97,13 @@ contract Session {
         return (productName, description, images, suggestPrice, finalPrice, uint(status));
     }
 
-    // Calculate suggest price and set status to Close.
-    function calculateSuggestPriceAndCloseSession(int _price) public onlyAdmin onlyInProgress {
+    // Get Participant pricing exists.
+    function getParticipantPricingExists(address _paticipant) public view returns (bool) {
+        return isParticipantPricingExists[_paticipant];
+    }
+
+    // Calculate suggest price.
+    function calculateSuggestPrice(int _price) private {
         int _suggestPrice = 0;
         int _sumOfPriceWithDeviation = 0;
         int _sumOfDeviation = 0;
@@ -119,7 +117,6 @@ contract Session {
         _suggestPrice = _sumOfPriceWithDeviation / ((100 * int(participantPricings.length)) - _sumOfDeviation);
         suggestPrice = uint(_suggestPrice);
         finalPrice = _price;
-        status = SESSION_STATUS.CLOSE;
     }
 
     // Calculate deviation in session.
@@ -131,29 +128,30 @@ contract Session {
     }
 
     // Calculate deviation.
-    function calculateDeviationLatestAndStop() public onlyAdmin onlyFinalPriceMustSetValue {
+    function calculateDeviationLatestAndStop() private {
         for (uint i = 0; i < participantPricings.length; i++) {
             address _account = participantPricings[i];
             int _deviation = MainContract.getDeviation(_account);
             int _numberOfSession = MainContract.getNumberOfSession(_account);
             int _subDeviation = (_deviation * _numberOfSession) + calculateDeviationInSession(_account);
             int _newDeviation = _subDeviation / (_numberOfSession + 1);
-            MainContract.setDeviation(_account, _newDeviation);
+            MainContract.setDeviation(address(this), _account, _newDeviation);
             MainContract.incrementNumberOfSession(_account);
         }
 
         status = SESSION_STATUS.STOP;
+        emit UpdateSessionStatus("Calculate and update session status to STOP");
+    }
+
+    // Stop session and calculate deviation on each participant.
+    function stopSession(int _price) public onlyAdmin onlyInProgress {
+        calculateSuggestPrice(_price);
+        calculateDeviationLatestAndStop();
     }
 
     // Modify only status is PRICING.
     modifier onlyInProgress {
         require(status == SESSION_STATUS.PRICING, "Session is not in progress");
-        _;
-    }
-
-    // Modify only status is CLOSE.
-    modifier onlyClose {
-        require(status == SESSION_STATUS.CLOSE, "Session is not in progress");
         _;
     }
 
@@ -167,12 +165,6 @@ contract Session {
     modifier onlyParticipant() {
         // TODO: viet lai modifier nay
         require(msg.sender != adminAddr, "This function only participant can execute!");
-        _;
-    }
-
-    // Modify finalPrice must set value.
-    modifier onlyFinalPriceMustSetValue() {
-        require(finalPrice > 0, "Final price must set value!");
         _;
     }
 

@@ -65,30 +65,27 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                     class='btn btn-outline-primary'
                     type='button'
                     onclick={e => fn({ type: 'start', payload: {index: currentProductIndex} })}
+                    disabled={product.status == config.SESSION_STATUS.CREATED ? '' : 'disabled'}
                   >
                     Start
-                  </button>
-                  <button
-                    class='btn btn-outline-primary'
-                    type='button'
-                    onclick={e => fn({ type: 'stop', payload: {index: currentProductIndex}})}
-                  >
-                    Stop
                   </button>
                 </div>
                 <input
                   type='number'
                   class='form-control'
-                  placeholder='price'
+                  placeholder='Final Price'
                   oninput={e => (price = e.target.value)}
+                  disabled={product.status == config.SESSION_STATUS.PRICING ? '' : 'disabled'}
+                  id="txtPriceAdmin"
                 />
                 <div class='input-group-append'>
                   <button
                     class='btn btn-outline-primary'
                     type='button'
-                    onclick={e => fn({ type: 'close', payload: {index: currentProductIndex, price}})}
+                    onclick={e => fn({ type: 'stop', payload: {index: currentProductIndex, price}})}
+                    disabled={product.status == config.SESSION_STATUS.PRICING ? '' : 'disabled'}
                   >
-                    Set price and close
+                    Set price and Stop
                   </button>
                 </div>
               </div>
@@ -102,6 +99,7 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                   placeholder='price'
                   oninput={e => (price = e.target.value)}
                   disabled={product.status != config.SESSION_STATUS.PRICING}
+                  id="txtPrice"
                 />
                 <div class='input-group-append'>
                   <button
@@ -186,7 +184,7 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
           </div>
           <div class='card-footer'>
             <button type='submit' class='btn btn-primary' onclick={create}>
-              Create
+              Create Session
             </button>
           </div>
         </div>)
@@ -195,22 +193,38 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
   );
 };
 
-const ProductRow = ({ product, index, select, currentIndex }) => (
-  <tr
-    onclick={e => select(index)}
-    class={index === currentIndex ? 'active' : ''}
-  >
-    <th scope='row'>{product.no}</th>
-    <td>{product.name}</td>
-    <td>{product.description} </td>
-    <td>$ {product.priceFormat}</td>
-    <td>
-      <span class={`badge badge-${config.sessionBadgeClasses[product.status]}`}>
-        {config.SESSION_STATUS_TEXT[product.status] || 'N/A'}
-      </span>
-    </td>
-  </tr>
-);
+const ProductRow = ({ product, index, select, currentIndex }) => {
+  const handleOnRowClick = (index) => {
+    select(index);
+    const txtPrice = document.getElementById('txtPrice');
+    const txtPriceAdmin = document.getElementById('txtPriceAdmin');
+
+    if (txtPrice != undefined) {
+      txtPrice.value = '';
+    }
+
+    if (txtPriceAdmin != undefined) {
+      txtPriceAdmin.value = '';
+    }
+  };
+
+  return (
+    <tr
+      onclick={e => handleOnRowClick(index)}
+      class={index === currentIndex ? 'active' : ''}
+    >
+      <th scope='row'>{product.no}</th>
+      <td>{product.name}</td>
+      <td>{product.description} </td>
+      <td>$ {product.priceFormat}</td>
+      <td>
+        <span class={`badge badge-${config.sessionBadgeClasses[product.status]}`}>
+          {config.SESSION_STATUS_TEXT[product.status] || 'N/A'}
+        </span>
+      </td>
+    </tr>
+  );
+};
 
 const Products = ({ match }) => (
   { newProduct, sessions, currentProductIndex, isAdmin },
@@ -229,6 +243,10 @@ const Products = ({ match }) => (
         position: 'center',
         backgroundColor: config.color.success
       }).showToast();
+
+      if (params.type == 'pricing' && document.getElementById('txtPrice') != undefined) {
+        document.getElementById('txtPrice').value = '';
+      }
     } catch (error) {
       console.log(error);
       loading.dismiss();
@@ -237,6 +255,10 @@ const Products = ({ match }) => (
         position: 'center',
         backgroundColor: config.color.error
       }).showToast();
+
+      if (params.type == 'pricing' && document.getElementById('txtPrice') != undefined) {
+        document.getElementById('txtPrice').value = '';
+      }
     }
   }
 

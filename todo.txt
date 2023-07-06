@@ -1,6 +1,7 @@
 - validate form
 - them popup confirm khi: start, close
 - bug: sau khi stop quay lai man hinh home thi % rateing ko dc update -> fix roi hung phai theo doi
+- ham ko dc su dung: updateSession, getParticipantPricings
 
 https://upload.wikimedia.org/wikipedia/en/b/bd/Doraemon_character.png
 
