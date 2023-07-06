@@ -106,7 +106,9 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
                   <th scope='col'>Address</th>
                   <th scope='col'>Fullname</th>
                   <th scope='col'>Session</th>
-                  <th scope='col'>Credit Rating</th>
+                  <th scope='col'>
+                    <i class="fa-solid fa-star"></i> Credit Rating
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -118,8 +120,8 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
                         <tr>
                           <td>{p.no}</td>
                           <td><code>{p.address}</code></td>
-                          <td>{p.fullname}</td>
-                          <td>{p.nSessions}</td>
+                          <td>{p.fullname || 'N/A'}</td>
+                          <td>{p.nSessions || 0}</td>
                           <td>
                             <ProgressBar deviation={p.deviation} />
                           </td>

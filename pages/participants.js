@@ -90,7 +90,7 @@ const ParticipantRow = ({ participant, openUserEditModal }) => (
       {participant.nSessions || 0}
     </td>
     <td scope='row' class='align-middle text-center'>
-      {participant.deviation} %
+      {participant.deviation}%
     </td>
     <td scope='row' class='align-middle text-center'>
       <code>{participant.address}</code>
