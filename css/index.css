@@ -31,3 +31,8 @@
 .cursor-no-drop {
   cursor: no-drop;
 }
+
+.sidebar .nav-link.active {
+  color: #fff;
+  background: #575b5f;
+}

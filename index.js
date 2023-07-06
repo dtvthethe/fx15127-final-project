@@ -1,5 +1,5 @@
 import { app, h } from 'hyperapp';
-import { Link, Route, location } from '@hyperapp/router';
+import { Route, location } from '@hyperapp/router';
 import { Products } from './pages/products';
 import { Sidebar } from './pages/sidebar';
 import { Participants } from './pages/participants';
@@ -16,7 +16,6 @@ import JSAlert from 'js-alert';
 import Toastify from 'toastify-js'
 import "toastify-js/src/toastify.css"
 import { Home } from './pages/home';
-import { log } from 'console';
 
 const Fragment = (props, children) => children;
 
@@ -78,7 +77,9 @@ function componentMain() {
       txtFullname: true,
       txtEmail: true,
     },
-    titlePage: '...'
+    titlePage: '...',
+    participants: [],
+    isAdmin: false,
   };
 
   // Functions of Main Contract
@@ -166,10 +167,6 @@ function componentMain() {
       //   .send({ from: state.account });
 
       // actions.getSessions();
-
-      // my code
-
-      // console.log(state.newProduct);
       await contractFunctions.createSession(state.newProduct.name, state.newProduct.description, state.newProduct.image)({ from: state.account });
       await actions.getSessions();
     },
@@ -513,10 +510,6 @@ function componentMain() {
     state,
     { fetchData, register, inputProfile }
   ) => {
-    // return (<body>Test</body>);
-    // console.log(
-    //   state
-    // );
     return (
       <body
         class='app sidebar-show sidebar-fixed'
@@ -532,6 +525,7 @@ function componentMain() {
             profile={state.profile}
             register={register}
             inputProfile={inputProfile}
+            location={state.location}
           ></Sidebar>
           <main class='main d-flex p-3'>
             <div class='h-100  w-100'>

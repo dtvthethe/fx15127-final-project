@@ -213,7 +213,7 @@ const ProductRow = ({ product, index, select, currentIndex }) => (
 );
 
 const Products = ({ match }) => (
-  { newProduct, sessions, currentProductIndex, isAdmin, location },
+  { newProduct, sessions, currentProductIndex, isAdmin },
   { inputNewProduct, createProduct, selectProduct, sessionFn }
 ) => {
   document.title = `Products | ${config.APP_NAME}` || 'N/A';

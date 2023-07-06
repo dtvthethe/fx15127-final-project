@@ -1,7 +1,6 @@
 - validate form
-- register nhap thong tin name, email cung chan show Toat de biet la update thonf tin thanh cong
 - them popup confirm khi: start, close
-- numberOfSession: đọc lại spec, số lượng này chỉ đc tăng khi ng admin chốt giá p ko?
+- bug: sau khi stop quay lai man hinh home thi % rateing ko dc update -> fix roi hung phai theo doi
 
 https://upload.wikimedia.org/wikipedia/en/b/bd/Doraemon_character.png
 

@@ -111,8 +111,11 @@ const Sidebar = ({
   isAdmin,
   profile,
   register,
-  inputProfile
+  inputProfile,
+  location
 }) => {
+  const pathname = location.pathname;
+
   return (
     <div class='sidebar'>
       <Account
@@ -131,14 +134,19 @@ const Sidebar = ({
           <li class='nav-divider'></li>
           <li class='nav-title'>View all</li>
           <li class='nav-item'>
-            <Link class='nav-link' to='/products'>
+            <Link class={`nav-link ${pathname == '/' ? 'active' : ''}`} to='/'>
+              <i class='fa-solid fa-house'></i> Home
+            </Link>
+          </li>
+          <li class='nav-item'>
+            <Link class={`nav-link ${pathname == '/products' ? 'active' : ''}`} to='/products'>
               <i class='fa-solid fa-scale-balanced'></i> Products
             </Link>
           </li>
           <li class='nav-item'>
             {
             isAdmin
-              ? (<Link class='nav-link' to='/participants'>
+              ? (<Link class={`nav-link ${pathname == '/participants' ? 'active' : ''}`} to='/participants'>
                 <i class='fa-solid fa-users'></i> Participants
               </Link>)
               : <a class="nav-link cursor-no-drop" style="color: #747474"><i class='fa-solid fa-users'></i> Participants</a>
