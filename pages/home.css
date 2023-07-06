@@ -1,8 +1,38 @@
-.if tr td {
-    padding: 10px;
+.tb-top-participant {
+    font-size: 13px;
 }
 
-.if tr td.eg {
+.custom-scrollbar {
+    position: relative;
+    overflow: auto;
+}
+
+.table-wrapper-scroll-y {
+    display: block;
+}
+
+.tb-top-participant thead tr th{
+    border-top: none;
+}
+
+.panel-title {
+    background-color: white;
     text-align: center;
     font-weight: bold;
+    color: #f96384;
+    padding: 9px;
 }
+
+.home-title {
+    justify-content: center;
+    margin-bottom: 9px;
+    padding: 5px;
+    color: #f96384;
+}
+
+
+
+
+
+
+
