@@ -163,6 +163,17 @@ contract Session {
         }
     }
 
+    // Get all prices
+    function getAllPrices() public onlyAdmin() view returns(int[]) {
+        int[] memory prices = new int[](participantPricings.length);
+
+        for (uint8 i = 0; i < participantPricings.length; i++) {
+            prices[i] = mapParticipantPricings[participantPricings[i]];
+        }
+
+        return prices;
+    }
+
     // Modify only status is PRICING.
     modifier onlyInProgress {
         require(status == SESSION_STATUS.PRICING, "Session is not in progress");

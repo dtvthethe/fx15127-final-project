@@ -67,11 +67,6 @@ function componentMain() {
     newProduct: {},
     sessions: [],
     currentProductIndex: 0,
-    newParticipant: {
-      address: '',
-      fullname: '',
-      email: ''
-    },
     frmParticipant: {
       txtAddress: true,
       txtFullname: true,
@@ -169,6 +164,7 @@ function componentMain() {
       // actions.getSessions();
       await contractFunctions.createSession(state.newProduct.name, state.newProduct.description, state.newProduct.image)({ from: state.account });
       state.newProduct = {};
+      await actions.fetchBalance();
       await actions.getSessions();
     },
 
@@ -191,11 +187,13 @@ function componentMain() {
         case 'start':
           //TODO: Handle event when User Start a new session
           await contract.methods.startSession().send({ from: state.account });
+          await actions.fetchBalance();
 
           break;
         case 'stop':
           //TODO: Handle event when User Stop a session
           await contract.methods.stopSession(action.payload.price).send({ from: state.account });
+          await actions.fetchBalance();
           await actions.getParticipants();
 
           break;
@@ -203,6 +201,7 @@ function componentMain() {
           //TODO: Handle event when User Pricing a product
           //The inputed Price is stored in `data`
           await contract.methods.pricing(action.payload.price).send({ from: state.account });
+          await actions.fetchBalance();
 
         //   break;
         // case 'close':
@@ -313,33 +312,36 @@ function componentMain() {
       };
     },
 
-    register: (isUpdateProfile) => async (state, actions) => {
+    register: (payload) => async (state, actions) => {
       // TODO: Register new participant
       const loading = JSAlert.loader('Please wait...');
       const currentAccount = localStorage.getItem(config.loginStoreKey);
 
       try {
         if (state.isAdmin) {
-          if (isUpdateProfile) {
+          if (payload.isUpdateProfile) {
+            // Admin update profile
             await contractFunctions.updateAdminProfile(
-              state.profile.fullname,
-              state.profile.email
+              payload.fullname,
+              payload.email
             )({ from: currentAccount });
           } else {
+            // Admin edit Participant profile
             await contractFunctions.register(
-              state.newParticipant.address,
-              state.newParticipant.fullname,
-              state.newParticipant.email
+              payload.address,
+              payload.fullname,
+              payload.email
             )({ from: currentAccount });
             await actions.fetchBalance();
             await actions.getParticipants();
           }
         } else {
-          if (isUpdateProfile) {
+          // Participant update profile
+          if (payload.isUpdateProfile) {
             await contractFunctions.register(
-              currentAccount,
-              state.profile.fullname,
-              state.profile.email
+              payload.address,
+              payload.fullname,
+              payload.email
             )({ from: currentAccount });
           }
         }
@@ -358,7 +360,7 @@ function componentMain() {
         console.log(error);
       }
 
-      if (isUpdateProfile) {
+      if (payload.isUpdateProfile) {
         const profile = state.isAdmin
           ? await contractFunctions.getAdminProfile()({ from: currentAccount })
           : await contractFunctions.participants(currentAccount)({ from: currentAccount });
@@ -406,10 +408,20 @@ function componentMain() {
         let priceFormat = 0;
         let finalPriceFormat = 0;
         let myPricingFormat = '∞';
+        let myPricingOriginal = 0;
+        let prices = [];
 
-        if (!state.isAdmin) {
+        if (state.isAdmin) {
+          let arrPrices = await contract.methods.getAllPrices().call({ from: state.account });
+
+          if (arrPrices.length > 0) {
+            prices.push('$ ' + Math.min(...arrPrices).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+            prices.push('$ ' + Math.max(...arrPrices).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+          }
+        } else {
           const myPricing = await contract.methods.getPricingByParticipant().call({ from: state.account });
           myPricingFormat = '$ ' + myPricing.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          myPricingOriginal = myPricing;
         }
 
         if (price > 0) {
@@ -431,7 +443,9 @@ function componentMain() {
           status,
           priceFormat,
           finalPriceFormat,
-          myPricingFormat
+          myPricingFormat,
+          myPricingOriginal,
+          prices
         });
       }
 
@@ -459,16 +473,6 @@ function componentMain() {
       }
     },
 
-    inputNewParticipant: ({ fieldName, value }) => state => {
-      let newParticipant = state.newParticipant;
-      newParticipant[fieldName] = value;
-
-      return {
-        ...state,
-        newParticipant
-      };
-    },
-
     setFrmParticipant: ({ fieldName, value }) => state => {
       let frmParticipant = state.frmParticipant;
       frmParticipant[fieldName] = !value;
@@ -479,11 +483,11 @@ function componentMain() {
       };
     },
 
-    createNewParticipant: () => async (state, actions) => {
+    createNewParticipant: (address) => async (state, actions) => {
       const loading = JSAlert.loader('Please wait...');
 
       try {
-        await contractFunctions.addParticipant(state.newParticipant.address)({ from: state.account });
+        await contractFunctions.addParticipant(address)({ from: state.account });
         await actions.fetchBalance();
         await actions.getParticipants();
         loading.dismiss();

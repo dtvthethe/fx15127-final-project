@@ -1,11 +1,14 @@
-- validate form
-- them popup confirm khi: start, close
+- validate form:
+	+ add par thi check co phai admin accoun ko -> ko dc add
 - bug: 
-    + sau khi stop quay lai man hinh home thi % rateing ko dc update -> fix roi hung phai theo doi
+    + test neu chua add session thi chart cua admin phai sho ko error
 - ham ko dc su dung: updateSession, getParticipantPricings
 - fecth lai balance sau khi thuc hien call SM, bo sung vao test case "Fecth admin balance"
 - test case Participant-4.1: canf thêm 1 "Your price = $"  để biết là đã định giá bao nhiêu
 
+- update:
+	_ chart: user show them My Pricing
+	- product detail: add Price range
 
 https://upload.wikimedia.org/wikipedia/en/b/bd/Doraemon_character.png
 

@@ -3,8 +3,19 @@ import { Link } from '@hyperapp/router';
 
 const Fragment = (props, children) => children;
 
-const Profile = ({ profile, register, inputProfile }) => {
+const Profile = ({ profile, register }) => {
   const hasProfile = profile && profile.nSessions > 0;
+  let newParticipant = {};
+
+  if (profile) {
+    newParticipant = {
+      address: profile.account || '',
+      fullname: profile.fullname || '',
+      email: profile.email || '',
+      isUpdateProfile: true
+    };
+  }
+
   if (profile) {
     return hasProfile ? (
       <>
@@ -48,7 +59,7 @@ const Profile = ({ profile, register, inputProfile }) => {
             type='text'
             value={profile.fullname}
             oninput={e => {
-              inputProfile({ field: 'fullname', value: e.target.value });
+              newParticipant.fullname = e.target.value;
             }}
           ></input>
         </li>
@@ -63,7 +74,7 @@ const Profile = ({ profile, register, inputProfile }) => {
             type='email'
             value={profile.email}
             oninput={e => {
-              inputProfile({ field: 'email', value: e.target.value });
+              newParticipant.email = e.target.value;
             }}
           ></input>
         </li>
@@ -71,7 +82,7 @@ const Profile = ({ profile, register, inputProfile }) => {
           <button
             class='btn  btn-sm btn-ghost-primary btn-block '
             type='button'
-            onclick={() => register(true)}
+            onclick={() => register(newParticipant)}
           >
             Register
           </button>
@@ -111,7 +122,6 @@ const Sidebar = ({
   isAdmin,
   profile,
   register,
-  inputProfile,
   location
 }) => {
   const pathname = location.pathname;
@@ -129,7 +139,6 @@ const Sidebar = ({
           <Profile
             profile={profile}
             register={register}
-            inputProfile={inputProfile}
           ></Profile>
           <li class='nav-divider'></li>
           <li class='nav-title'>View all</li>

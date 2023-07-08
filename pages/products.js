@@ -60,6 +60,14 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
               <dd class='col-sm-8'>
                 <p>{product.myPricingFormat}</p>
               </dd>
+              {
+                isAdmin && <>
+                <dt class='col-sm-4'>Price range:</dt>
+                <dd class='col-sm-8'>
+                  <p>{product.prices.length > 0 ? product.prices[0] + ' ~ ' + product.prices[1] : '~'}</p>
+                </dd>
+                </>
+              }
             </dl>
           </div>
           {isAdmin ? (
