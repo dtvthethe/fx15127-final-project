@@ -1,8 +1,8 @@
 exports.config = {
-  mainContract: '0xE02C63728Ce55f337bA776a925c0Cc1C04F2Ad8b',
+  mainContract: '0xaba555BC8C9248d35d4AA9D1EF21219d3fd318ff',
   loginStoreKey: 'LOGIN_STORE_KEY',
   zeroAddress: '0x0000000000000000000000000000000000000000',
-  APP_NAME: 'Product Pricing System',
+  APP_NAME: 'Funix Pricing Chain',
   // MAX_OF_PARTICIPANTS: 10,
   MAX_OF_PARTICIPANTS: 4,
   onlyAdminPages: [
@@ -15,14 +15,12 @@ exports.config = {
   SESSION_STATUS: {
     CREATED: 0,
     PRICING: 1,
-    CLOSE: 2,
-    STOP: 3
+    STOP: 2,
   },
   SESSION_STATUS_TEXT: {
     0: 'Created',
     1: 'Pricing',
-    2: 'Close',
-    3: 'Stop'
+    2: 'Stop',
   },
   sessionBadgeClasses: {
     0: 'success',
