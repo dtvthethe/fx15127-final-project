@@ -60,6 +60,14 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
               <dd class='col-sm-8'>
                 <p>{product.myPricingFormat}</p>
               </dd>
+              {
+                isAdmin && <>
+                <dt class='col-sm-4'>Price range</dt>
+                <dd class='col-sm-8'>
+                  <p>{product.prices.length > 0 ? product.prices[0] + ' ~ ' + product.prices[1] : '~'}</p>
+                </dd>
+                </>
+              }
             </dl>
           </div>
           {isAdmin ? (
@@ -101,7 +109,7 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                 <input
                   type='number'
                   class='form-control'
-                  placeholder='price'
+                  placeholder='Price'
                   oninput={e => (price = e.target.value)}
                   disabled={product.status != config.SESSION_STATUS.PRICING}
                   id="txtPrice"
@@ -235,7 +243,7 @@ const Products = ({ match }) => (
   { newProduct, sessions, currentProductIndex, isAdmin },
   { inputNewProduct, createProduct, selectProduct, sessionFn }
 ) => {
-  document.title = `Products | ${config.APP_NAME}` || 'N/A';
+  document.title = `Sessions | ${config.APP_NAME}` || 'N/A';
 
   const handleSessionFn = async (params) => {
     const loading = JSAlert.loader('Please wait...');

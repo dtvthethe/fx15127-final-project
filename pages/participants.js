@@ -5,7 +5,13 @@ import Toastify from 'toastify-js';
 import { modalHide, modalShow } from './common/modal.js';
 import { config } from '../config';
 
-const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipant, frmParticipant }) => (
+let userForm = {
+  address: '',
+  fullname: '',
+  email: ''
+}
+
+const MyModal = ({ handleOnCreateParticipant, frmParticipant }) => (
   <div id="userModal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -22,11 +28,11 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   class='form-control'
                   id='address'
                   placeholder='0x94645E...'
-                  value={newParticipant.address}
+                  value={userForm.address}
                   disabled={frmParticipant.txtAddress}
                   maxlength="50"
                   oninput={e => {
-                    inputNewParticipant({ fieldName: 'address', value: e.target.value });
+                    userForm.address = e.target.value;
                   }}
                 />
               </div>
@@ -37,11 +43,11 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   class='form-control'
                   id='fullname'
                   placeholder='John Doe'
-                  value={newParticipant.fullname}
+                  value={userForm.fullname}
                   disabled={frmParticipant.txtFullname}
                   maxlength="120"
                   oninput={e => {
-                    inputNewParticipant({ fieldName: 'fullname', value: e.target.value });
+                    userForm.fullname = e.target.value;
                   }}
                 />
               </div>
@@ -52,11 +58,11 @@ const MyModal = ({ inputNewParticipant, newParticipant, handleOnCreateParticipan
                   class='form-control'
                   id='email'
                   placeholder='example@email.com'
-                  value={newParticipant.email}
+                  value={userForm.email}
                   disabled={frmParticipant.txtEmail}
                   maxlength="120"
                   oninput={e => {
-                    inputNewParticipant({ fieldName: 'email', value: e.target.value });
+                    userForm.email = e.target.value;
                   }}
                 />
               </div>
@@ -104,8 +110,8 @@ const ParticipantRow = ({ participant, openUserEditModal }) => (
 );
 
 const Participants = ({ match }) => (
-  { participants, newParticipant, frmParticipant },
-  { inputNewParticipant, createNewParticipant, setFrmParticipant, register }
+  { participants, frmParticipant },
+  { createNewParticipant, setFrmParticipant, register }
 ) => {
   document.title = `Participants | ${config.APP_NAME}` || 'N/A';
 
@@ -138,20 +144,21 @@ const Participants = ({ match }) => (
   const handleOnCreateParticipant = async () => {
     modalHide('userModal');
 
-    try {
-      if (frmParticipant.txtAddress === true) {
-        await register(false);
-      } else {
-        await createNewParticipant();
-      }
-    } catch (error) {
+    if (frmParticipant.txtAddress === true) {
+      const newParticipant = {
+        ...userForm,
+        isUpdateProfile: false
+      };
+      await register(newParticipant);
+    } else {
+      await createNewParticipant(userForm.address);
     }
   }
 
   const resetForm = (address = '', fullname = '', email = '') => {
-    inputNewParticipant({ fieldName: 'address', value: address });
-    inputNewParticipant({ fieldName: 'fullname', value: fullname });
-    inputNewParticipant({ fieldName: 'email', value: email });
+    userForm.address = address;
+    userForm.fullname = fullname;
+    userForm.email = email;
   }
 
   const frmAdd = (txtAddress, txtOther) => {
@@ -195,8 +202,6 @@ const Participants = ({ match }) => (
       </div>
       {/* <div class='p-2 flex product-detail'></div> */}
       <MyModal
-        inputNewParticipant={inputNewParticipant}
-        newParticipant={newParticipant}
         handleOnCreateParticipant={handleOnCreateParticipant}
         frmParticipant={frmParticipant}
       />

@@ -8,6 +8,7 @@ let sessionChart = null;
 
 
 const Home = () => ({ sessions, participants, isAdmin }, { }) => {
+  document.title = `Home | ${config.APP_NAME}` || 'N/A';
   let topParticipants = null;
 
   if (participants.length > 0) {
@@ -44,7 +45,7 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
   }
 
   const createSessionChart = () => {
-    const names = sessions.map(p => p.name || p.id.substring(0, 3) + '...' + p.id.substring(38, 42));
+    const names = sessions.map(p => p.name ? p.name.substring(0, 4) + '...' + p.name.substring(p.name.length - 6, p.name.length) : p.id.substring(0, 3) + '...' + p.id.substring(38, 42));
     const suggestPrices = sessions.map(p => p.price || 0);
     const finalPrices = sessions.map(p => p.finalPrice || 0);
 
@@ -52,27 +53,39 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
       sessionChart.destroy();
     }
 
+    let myDataSet = [
+      {
+        label: 'Suggest Price',
+        data: suggestPrices,
+        fill: false,
+        backgroundColor: '#f96384',
+        tension: 0.1,
+      },
+      {
+        label: 'Final Price',
+        data: finalPrices,
+        fill: false,
+        backgroundColor: '#4bc0c0',
+        tension: 0.1,
+      }
+    ];
+
+    if (!isAdmin) {
+      myDataSet.push({
+        label: 'My Pricing',
+        data: sessions.map(p => p.myPricingOriginal || 0),
+        fill: false,
+        backgroundColor: '#a87dff',
+        tension: 0.1,
+      });
+    }
+
     const ctx = document.getElementById('sessionChart').getContext('2d');
     sessionChart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: names,
-        datasets: [
-          {
-            label: 'Suggest Price',
-            data: suggestPrices,
-            fill: false,
-            backgroundColor: '#f96384',
-            tension: 0.1,
-          },
-          {
-            label: 'Final Price',
-            data: finalPrices,
-            fill: false,
-            backgroundColor: '#4bc0c0',
-            tension: 0.1,
-          }
-        ]
+        datasets: myDataSet
       },
       options: {
         scales: {
@@ -137,7 +150,7 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
           </div>
         </div>
         <div class='pl-2 flex product-detail'>
-          <div class="panel-title">Graph of "Suggest Price" and "Final Price"</div>
+          <div class="panel-title">Graph of Pricing</div>
           <div class="bg-white" id="sessionAlert" style="text-align: center; height: 98px">No data</div>
           <canvas class="bg-white" id="sessionChart"></canvas>
         </div>
