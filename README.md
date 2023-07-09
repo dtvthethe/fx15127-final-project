@@ -42,9 +42,9 @@ Execute `npm start` to run frontend.
 All function connecting with Smart contract are located in `index.js` with `TODO:` prefix. 
 
 # Custom Note:
+- Install `yarn install`
 - cd to `truffle` folder `truffle migrate`, copy smart contract address deploy.
 - Update smart contract address to `mainContract` in `config.js` file.
-- Install `yarn install`
 - Run `yarn start`
 - App url `http://localhost:1234`
 - Unit Test:
@@ -52,7 +52,7 @@ All function connecting with Smart contract are located in `index.js` with `TODO
 cd truffle
 truffle test ./test/pricing-system.js
 ```
-- Connect local to Remix IDE (install remixd https://www.npmjs.com/package/@remix-project/remixd): 
+- Debug: Connect local to Remix IDE (install remixd https://www.npmjs.com/package/@remix-project/remixd): 
 ```
 cd truffle/
 remixd -s ./ -u https://remix.ethereum.org
