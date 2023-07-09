@@ -589,6 +589,6 @@ function componentLogin() {
     </body>
   );
 
-  document.title = `Login | ${config.APP_NAME}` || 'N/A';
+  document.title = `Sign-in | ${config.APP_NAME}` || 'N/A';
   app(state, actions, view, document.body)
 };

@@ -8,6 +8,7 @@ let sessionChart = null;
 
 
 const Home = () => ({ sessions, participants, isAdmin }, { }) => {
+  document.title = `Home | ${config.APP_NAME}` || 'N/A';
   let topParticipants = null;
 
   if (participants.length > 0) {

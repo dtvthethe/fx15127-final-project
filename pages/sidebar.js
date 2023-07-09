@@ -149,7 +149,7 @@ const Sidebar = ({
           </li>
           <li class='nav-item'>
             <Link class={`nav-link ${pathname == '/products' ? 'active' : ''}`} to='/products'>
-              <i class='fa-solid fa-scale-balanced'></i> Products
+              <i class='fa-solid fa-scale-balanced'></i> Sessions
             </Link>
           </li>
           <li class='nav-item'>

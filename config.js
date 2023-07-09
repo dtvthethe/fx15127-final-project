@@ -3,8 +3,7 @@ exports.config = {
   loginStoreKey: 'LOGIN_STORE_KEY',
   zeroAddress: '0x0000000000000000000000000000000000000000',
   APP_NAME: 'Funix Pricing Chain',
-  // MAX_OF_PARTICIPANTS: 10,
-  MAX_OF_PARTICIPANTS: 4,
+  MAX_OF_PARTICIPANTS: 10,
   onlyAdminPages: [
     '/participants',
   ],
