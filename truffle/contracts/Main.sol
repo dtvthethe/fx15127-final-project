@@ -68,7 +68,7 @@ contract Main is IMain {
         emit AddParticipant(_account, "Add participant success!");
     }
 
-    // Update participant.
+    // Update participant profile.
     function register(address _account, string memory _fullName, string memory _email) public {
         mapParticipants[_account].fullName = _fullName;
         mapParticipants[_account].email = _email;
@@ -101,17 +101,17 @@ contract Main is IMain {
         return mapParticipants[participantItems[_index]];
     }
 
-    // Get deviation by participant.
+    // Get deviation by participant address.
     function getDeviation(address _account) public view returns (int) {
         return mapParticipants[_account].deviation;
     }
 
-    // Set deviation.
+    // Set deviation for a participant.
     function setDeviation(address _session, address _account, int _deviation) public onlySessionContract(_session, _account) {
         mapParticipants[_account].deviation = _deviation;
     }
 
-    // Set numnber of session.
+    // Increment numnber of session for a participant.
     function incrementNumberOfSession(address _account) public {
         mapParticipants[_account].numberOfSession++;
     }

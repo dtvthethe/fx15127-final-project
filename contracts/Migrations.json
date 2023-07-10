@@ -70,7 +70,7 @@
   "sourceMap": "58:480:1:-;;;147:50;8:9:-1;5:2;;;30:1;27;20:12;5:2;147:50:1;182:10;174:5;;:18;;;;;;;;;;;;;;;;;;58:480;;;;;;",
   "deployedSourceMap": "58:480:1:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;371:165;;8:9:-1;5:2;;;30:1;27;20:12;5:2;371:165:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;106:36;;8:9:-1;5:2;;;30:1;27;20:12;5:2;106:36:1;;;;;;;;;;;;;;;;;;;;;;;82:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;82:20:1;;;;;;;;;;;;;;;;;;;;;;;;;;;264:103;;8:9:-1;5:2;;;30:1;27;20:12;5:2;264:103:1;;;;;;;;;;;;;;;;;;;;;;;;;;371:165;433:19;247:5;;;;;;;;;;;233:19;;:10;:19;;;229:26;;;466:11;433:45;;484:8;:21;;;506:24;;484:47;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;484:47:1;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;484:47:1;;;;229:26;371:165;;:::o;106:36::-;;;;:::o;82:20::-;;;;;;;;;;;;;:::o;264:103::-;247:5;;;;;;;;;;;233:19;;:10;:19;;;229:26;;;353:9;326:24;:36;;;;229:26;264:103;:::o",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.4.26;\n\ncontract Migrations {\n  address public owner;\n  uint public last_completed_migration;\n\n  constructor() public {\n    owner = msg.sender;\n  }\n\n  modifier restricted() {\n    if (msg.sender == owner) _;\n  }\n\n  function setCompleted(uint completed) public restricted {\n    last_completed_migration = completed;\n  }\n\n  function upgrade(address new_address) public restricted {\n    Migrations upgraded = Migrations(new_address);\n    upgraded.setCompleted(last_completed_migration);\n  }\n}\n",
-  "sourcePath": "/home/dttvhe/study/fx15127-final-project/truffle/contracts/Migrations.sol",
+  "sourcePath": "/Users/damthe/study/blockchain/fx15127-final-project/truffle/contracts/Migrations.sol",
   "ast": {
     "absolutePath": "project:/contracts/Migrations.sol",
     "exportedSymbols": {
@@ -194,7 +194,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1246,
+                        "referencedDeclaration": 1232,
                         "src": "182:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -280,7 +280,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1246,
+                        "referencedDeclaration": 1232,
                         "src": "233:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -900,7 +900,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 1246,
+                                  "referencedDeclaration": 1232,
                                   "type": "msg",
                                   "value": "msg"
                                 },
@@ -991,7 +991,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 1246,
+                                  "referencedDeclaration": 1232,
                                   "type": "msg",
                                   "value": "msg"
                                 },
@@ -1470,12 +1470,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x0D2aF732C560dC2694ce8655ec1D6f136BF10810",
-      "transactionHash": "0x9c1f1ac1cdcd733ca8700c74582f0449bda4355e45b045fbac2af45e8d391912"
+      "address": "0x3e4A3C7D82e15641082098A0b75eca4D4BA0c554",
+      "transactionHash": "0x9cfa6b997dfa109cac7db77421a0f9d9aadbf5defdfe2ca28314d1e55d51600a"
     }
   },
-  "schemaVersion": "3.4.14",
-  "updatedAt": "2023-07-08T21:39:01.040Z",
+  "schemaVersion": "3.4.10",
+  "updatedAt": "2023-07-10T08:36:55.163Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}

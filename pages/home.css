@@ -30,3 +30,6 @@
     color: #f96384;
 }
 
+.no-wrap {
+    white-space: nowrap;
+}
