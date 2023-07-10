@@ -50,7 +50,8 @@ All function connecting with Smart contract are located in `index.js` with `TODO
 - Unit Test:
 ```
 cd truffle
-truffle test ./test/pricing-system.js
+truffle test ./test/main.js
+truffle test ./test/session.js
 ```
 - Debug: Connect local to Remix IDE (install remixd https://www.npmjs.com/package/@remix-project/remixd): 
 ```
