@@ -82,7 +82,7 @@ contract Session {
         emit UpdateSessionStatus("Update session status to PRICING");
     }
 
-    // Participant pricing.
+    // Participant pricing session.
     function pricing(int _price) public onlyParticipant onlyInProgress {
         if (isParticipantPricingExists[msg.sender] == false) {
             isParticipantPricingExists[msg.sender] = true;
@@ -128,7 +128,7 @@ contract Session {
         return _subDeviationResult / 10**18;
     }
 
-    // Calculate deviation.
+    // Calculate deviation and upstate session status to STOP
     function calculateDeviationLatestAndStop() private {
         for (uint i = 0; i < participantPricings.length; i++) {
             address _account = participantPricings[i];

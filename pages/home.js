@@ -12,7 +12,10 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
   let topParticipants = null;
 
   if (participants.length > 0) {
-    topParticipants = participants.sort((current, next) => {
+    const invaledParticipants = participants.filter(p => p.nSessions == 0);
+    const valedParticipants = participants.filter(p => p.nSessions > 0);
+
+    topParticipants = valedParticipants.sort((current, next) => {
       const dCurrent = Number(current.deviation) || 0;
       const dNext = Number(next.deviation) || 0;
       if (dCurrent == dNext) {
@@ -22,6 +25,8 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
         return (dCurrent < dNext) ? -1 : 1;
       }
     });
+
+    topParticipants = [...valedParticipants, ...invaledParticipants];
   }
 
   const handleOnUpdate = () => {
@@ -119,8 +124,8 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
                   <th scope='col'>Address</th>
                   <th scope='col'>Fullname</th>
                   <th scope='col'>Session</th>
-                  <th scope='col'>
-                    <i class="fa-solid fa-star"></i> Credit Rating
+                  <th scope='col' class="no-wrap">
+                    <i class="fa-solid fa-star"></i>Credit Rating
                   </th>
                 </tr>
               </thead>
@@ -132,11 +137,15 @@ const Home = () => ({ sessions, participants, isAdmin }, { }) => {
                       return (
                         <tr>
                           <td>{p.no}</td>
-                          <td><code>{p.address}</code></td>
+                          <td><code class="no-wrap">{p.address.substring(0, 12) + '...' + p.address.substring(p.address.length - 10, p.address.length)}</code></td>
                           <td>{p.fullname || 'N/A'}</td>
                           <td>{p.nSessions || 0}</td>
                           <td>
-                            <ProgressBar deviation={p.deviation} />
+                            {
+                              p.nSessions == 0
+                                ? <p class="text-center">N/A</p>
+                                : <ProgressBar deviation={p.deviation} />
+                            }
                           </td>
                         </tr>
                       );
