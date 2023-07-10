@@ -101,12 +101,6 @@ contract Main is IMain {
         return mapParticipants[participantItems[_index]];
     }
 
-    // Create new Session.
-    function createSession(string memory _productName, string memory _description, string[] memory _images) public onlyAdmin(){
-        new Session(address(this), _productName, _description, _images);
-        emit CreateSession(_productName, _description);
-    }
-
     // Get deviation by participant.
     function getDeviation(address _account) public view returns (int) {
         return mapParticipants[_account].deviation;
@@ -122,9 +116,15 @@ contract Main is IMain {
         mapParticipants[_account].numberOfSession++;
     }
 
-    // Get number of session.
+    // Get number of session by participant.
     function getNumberOfSession(address _account) public view returns (int) {
         return mapParticipants[_account].numberOfSession;
+    }
+
+    // Create new Session.
+    function createSession(string memory _productName, string memory _description, string[] memory _images) public onlyAdmin(){
+        new Session(address(this), _productName, _description, _images);
+        emit CreateSession(_productName, _description);
     }
 
     // Get all session address.

@@ -68,17 +68,18 @@ contract Session {
     }
 
     // TODO: Functions
+
+    // Get session detail.
+    function getSessionDetail() public view returns(string memory, string memory, string[] memory, uint, int, uint) {
+        return (productName, description, images, suggestPrice, finalPrice, uint(status));
+    }
+
     // ..CREATED.. -> PRICING -> STOP
     // Update session status to PRICING.
     function startSession() public onlyAdmin {
         require(status == SESSION_STATUS.CREATED, "Session status must be CREATED");
         status = SESSION_STATUS.PRICING;
         emit UpdateSessionStatus("Update session status to PRICING");
-    }
-
-    // Get participant pricings.
-    function getParticipantPricings() public view returns (address[] memory) {
-        return participantPricings;
     }
 
     // Participant pricing.
@@ -92,9 +93,9 @@ contract Session {
         emit Pricing(msg.sender, "Pricing success!");
     }
 
-    // Get session detail.
-    function getSessionDetail() public view returns(string memory, string memory, string[] memory, uint, int, uint) {
-        return (productName, description, images, suggestPrice, finalPrice, uint(status));
+    // Get participant pricings.
+    function getParticipantPricings() public view returns (address[] memory) {
+        return participantPricings;
     }
 
     // Get Participant pricing exists.
