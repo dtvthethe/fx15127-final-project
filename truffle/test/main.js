@@ -3,6 +3,7 @@ const Session = artifacts.require("Session");
 const { config } = require('../../config');
 
 const MAX_OF_PARTICIPANTS = 4;
+let adminAddr = null;
 
 const getMsgEvent = (response) => {
     return response.logs[0].args;
@@ -32,7 +33,7 @@ contract('Main', (accounts) => {
 
     describe('Admin account', () => {
         it('Test get admin address', async () => {
-            const adminAddr = await MainInstance.getAdmin();
+            adminAddr = await MainInstance.admin.call();
             assert.equal(adminAddr, accounts[0], 'Failed Get Admin Address');
         });
 
@@ -132,10 +133,10 @@ contract('Main', (accounts) => {
     // Refer to file "BDP305x_TestCases.xlsx" sheet "Business Logic Calculate"
     describe("Business Logic Calculate", () => {
         it('Test Session create', async () => {
-            SessionInstance1 = await Session.new(MainInstance.address, 'session A', 'session A description', ['a.png']);
-            SessionInstance2 = await Session.new(MainInstance.address, 'session B', 'session B description', ['b.png']);
-            SessionInstance3 = await Session.new(MainInstance.address, 'session C', 'session C description', ['c.png']);
-            SessionInstance4 = await Session.new(MainInstance.address, 'session D', 'session D description', ['d.png']);
+            SessionInstance1 = await Session.new(MainInstance.address, 'session A', 'session A description', ['a.png'], adminAddr);
+            SessionInstance2 = await Session.new(MainInstance.address, 'session B', 'session B description', ['b.png'], adminAddr);
+            SessionInstance3 = await Session.new(MainInstance.address, 'session C', 'session C description', ['c.png'], adminAddr);
+            SessionInstance4 = await Session.new(MainInstance.address, 'session D', 'session D description', ['d.png'], adminAddr);
             assert.notEqual(SessionInstance1, undefined, 'Failed to deploy Session1 contract');
             assert.notEqual(SessionInstance2, undefined, 'Failed to deploy Session2 contract');
             assert.notEqual(SessionInstance3, undefined, 'Failed to deploy Session3 contract');

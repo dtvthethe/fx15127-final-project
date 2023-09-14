@@ -18,7 +18,7 @@ const Profile = ({ profile, register }) => {
 
   if (profile) {
     return hasProfile ? (
-      <>
+      <div>
         <li class='nav-title'>{profile.fullname}</li>
         <li class='nav-item px-3 mb-2'>
           <div>
@@ -44,9 +44,9 @@ const Profile = ({ profile, register }) => {
           </div>
           <small>{profile.deviation / 100}%</small>
         </li>
-      </>
+      </div>
     ) : (
-      <>
+      <div>
         <li class='nav-title'>Register</li>
         <li class='nav-item px-3 mb-2'>
           <div>
@@ -87,7 +87,7 @@ const Profile = ({ profile, register }) => {
             Register
           </button>
         </li>
-      </>
+      </div>
     );
   }
 };

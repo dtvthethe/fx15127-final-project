@@ -3,6 +3,7 @@ const Session = artifacts.require("Session");
 const { config } = require('../../config');
 
 const MAX_OF_PARTICIPANTS = 4;
+let adminAddr = null;
 
 contract('Session', (accounts) => {
     const participantAAddr = accounts[1];
@@ -19,11 +20,12 @@ contract('Session', (accounts) => {
         await MainInstance.addParticipant(participantBAddr);
         await MainInstance.addParticipant(participantCAddr);
         await MainInstance.addParticipant(participantDAddr);
+        adminAddr = await MainInstance.admin.call();
     });
 
     describe('Contract Session deploy', () => {
         it("Test Session create", async () => {
-            SessionInstance1 = await Session.new(MainInstance.address, 'session A', 'session A description', ['a.png']);
+            SessionInstance1 = await Session.new(MainInstance.address, 'session A', 'session A description', ['a.png'], adminAddr);
             assert.notEqual(SessionInstance1, undefined, 'Failed to deploy Session1 contract');
         });
     });

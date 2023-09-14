@@ -82,10 +82,8 @@ function componentMain() {
     getAccounts: promisify(web3js.eth.getAccounts),
     getBalance: promisify(web3js.eth.getBalance),
 
-    // TODO: The methods' name is for referenced. Update to match with your Main contract
-
     // Get Admin address of Main contract
-    getAdmin: mainContract.methods.getAdmin().call,
+    getAdmin: mainContract.methods.admin().call,
 
     // Get participant by address
     participants: address => mainContract.methods.participants(address).call,
@@ -148,19 +146,6 @@ function componentMain() {
     },
 
     createProduct: () => async (state, actions) => {
-      // let contract = new web3js.eth.Contract(Session.abi, {
-      //   data: Session.bytecode
-      // });
-      // await contract
-      //   .deploy({
-      //     arguments: [
-      //       // TODO: Argurment when Deploy the Session Contract
-      //       // It must be matched with Session.sol Contract Constructor
-      //       // Hint: You can get data from `state`
-      //     ]
-      //   })
-      //   .send({ from: state.account });
-
       // actions.getSessions();
       await contractFunctions.createSession(state.newProduct.name, state.newProduct.description, state.newProduct.image)({ from: state.account });
       state.newProduct = {};
@@ -215,17 +200,6 @@ function componentMain() {
     location: location.actions,
 
     getAccount: () => async (state, actions) => {
-      // let accounts = await contractFunctions.getAccounts();
-      // let balance = await contractFunctions.getBalance(accounts[0]);
-      // const admin = await contractFunctions.getAdmin();
-      // let profile = await contractFunctions.participants(accounts[0])();
-
-      // actions.setAccount({
-      //   account: accounts[0],
-      //   balance,
-      //   isAdmin: admin === accounts[0],
-      //   profile
-      // });
       const currentAccount = localStorage.getItem(config.loginStoreKey);
       const admin = await contractFunctions.getAdmin();
 
@@ -271,9 +245,6 @@ function componentMain() {
 
     getParticipants: () => async (state, actions) => {
       let participants = [];
-
-      // TODO: Load all participants from Main contract.
-      // One participant should contain { address, fullname, email, nSession and deviation }
       if (!state.isAdmin) {
         actions.setParticipants(participants);
 
@@ -377,10 +348,6 @@ function componentMain() {
     },
 
     getSessions: () => async (state, actions) => {
-      // TODO: Get the number of Sessions stored in Main contract
-      // let nSession = await contractFunctions.nSessions();
-      // let sessions = [];
-
       // TODO: And loop through all sessions to get information
       const results = await contractFunctions.getAllSessionAddresses()({ from: state.account });
       const nSession = results.length;
@@ -391,12 +358,7 @@ function componentMain() {
         let session = results[index];
         // Load the session contract on network
         let contract = new web3js.eth.Contract(Session.abi, session);
-
         let id = session;
-
-        // TODO: Load information of session.
-        // Hint: - Call methods of Session contract to reveal all nessesary information
-        //       - Use `await` to wait the response of contract
         const sessionDetail = await contract.methods.getSessionDetail().call({ from: state.account });
 
         let name = sessionDetail[0] || ''; // TODO

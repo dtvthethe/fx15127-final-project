@@ -1,5 +1,5 @@
 exports.config = {
-  mainContract: '0xc1585A12158295F7DD154f0c01144DF6AaA19246',
+  mainContract: '0x34EF11B37F37e538c45Eef8Ee14Df14B6f97Fc18',
   loginStoreKey: 'LOGIN_STORE_KEY',
   zeroAddress: '0x0000000000000000000000000000000000000000',
   APP_NAME: 'Funix Pricing Chain',

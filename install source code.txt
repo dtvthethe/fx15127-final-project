@@ -1,0 +1,27 @@
+- Install: `yarn install`
+
+- Migrate smart contract (start Ganache): 
+	```
+	cd truffle
+	truffle migrate
+	```
+
+- Update config.js: 
+	+ copy "contract address" to file "config.js" variable "mainContract"
+
+- Run: `yarn start` 
+	+ App url "http://localhost:1234"
+	+ Import account from Ganache to MetaMask
+
+- Unit Test:
+	```
+	cd truffle
+	truffle test ./test/main.js
+	truffle test ./test/session.js
+	```
+
+- Debug: Connect local to Remix IDE (install remixd https://www.npmjs.com/package/@remix-project/remixd): 
+	```
+	cd truffle/
+	remixd -s ./ -u https://remix.ethereum.org
+	```
