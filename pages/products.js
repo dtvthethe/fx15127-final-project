@@ -9,7 +9,7 @@ const Fragment = (props, children) => children;
 const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProductIndex }) => {
   let price = null;
   return (
-    <>
+    <div>
       {product ? (
         <div class='card product'>
           <div class='card-header'>
@@ -61,12 +61,14 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                 <p>{product.myPricingFormat}</p>
               </dd>
               {
-                isAdmin && <>
-                <dt class='col-sm-4'>Price range</dt>
-                <dd class='col-sm-8'>
-                  <p>{product.prices.length > 0 ? product.prices[0] + ' ~ ' + product.prices[1] : '~'}</p>
-                </dd>
-                </>
+                isAdmin &&
+                  <dt class='col-sm-4'>Price range</dt>
+              }
+              {
+                isAdmin &&
+                  <dd class='col-sm-8'>
+                    <p>{product.prices.length > 0 ? product.prices[0] + ' ~ ' + product.prices[1] : '~'}</p>
+                  </dd>
               }
             </dl>
           </div>
@@ -129,12 +131,12 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
                 ? (<div class='input-group text-center'>
                   <p class='w-100 mb-0 mt-1 text-danger'>This input only enable when Session status is <strong>PRICING</strong></p>
                 </div>)
-                : <></>}
+                : <div></div>}
             </div>
           )}
         </div>
       ) : (
-        <></>
+        <div></div>
       )}
 
       {
@@ -202,7 +204,7 @@ const Product = ({ product, newProduct, input, create, isAdmin, fn, currentProdu
           </div>
         </div>)
       }
-    </>
+    </div>
   );
 };
 
